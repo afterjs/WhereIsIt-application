@@ -1,21 +1,29 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, {useState} from "react";
+
+
+import { AuthContext } from "./src/components/context";
+import Stack from "./src/components/Stack";
+import Tab from "./src/components/Tab";
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+  const [IsAuthenticated, setIsAuthenticated] = useState(false);
+
+  const authContext = React.useMemo(() => ({
+    
+    signIn: () => {
+      setIsAuthenticated(true);
+    },
+    signOut: () => {
+      setIsAuthenticated(false);
+    },
+    data: () => {
+      return IsAuthenticated
+    }
+
+  }));
+  
+
+    return <AuthContext.Provider value={authContext}>{!IsAuthenticated ? <Stack /> : <Tab />}</AuthContext.Provider>;
+
+}
