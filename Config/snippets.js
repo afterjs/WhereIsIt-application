@@ -11,24 +11,9 @@ const heightPercentageToDP = heightPercent => {
     return PixelRatio.roundToNearestPixel(screenHeight * parseFloat(heightPercent) / 100);
 };
 
-const createTwoButtonAlert = (title, message) => {
-    val = false
-    
-    Alert.alert(title, message, [
-        {
-            text: 'Cancelar',
-            onPress: () => val = false,
-            style: 'cancel',
-        },
-        { text: 'OK', onPress: () => val = true },
-    ]);
-
-
-}
 
 
 export {
     widthPercentageToDP,
-    heightPercentageToDP,
-    createTwoButtonAlert
+    heightPercentageToDP
 }

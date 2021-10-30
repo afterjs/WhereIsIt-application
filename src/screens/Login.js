@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, View,  ScrollView, Image, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Alert } from "react-native";
 import { AuthContext } from "../components/context";
 
@@ -11,12 +11,14 @@ export default props => {
   const navigation = useNavigation();
   const { signIn } = React.useContext(AuthContext);
 
+
+   
   
 
   let register = () => {
-  //  navigation.replace("Register");
-    val = createTwoButtonAlert("teste 1", "teste 2")
-    console.log(val)
+   navigation.replace("Register");
+    //val = createTwoButtonAlert("teste 1", "teste 2")
+   // console.log(val)
   };
 
 
@@ -61,8 +63,6 @@ export default props => {
     </KeyboardAvoidingView>
   );
 };
-
-
 
 
 
