@@ -1,15 +1,22 @@
 import { useNavigation } from "@react-navigation/native";
+import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import React from "react";
-import { StyleSheet, View, Dimensions, ScrollView, Image, Text, TextInput, TouchableOpacity, KeyboardAvoidingView } from "react-native";
+import { StyleSheet, View,  ScrollView, Image, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Alert } from "react-native";
 import { AuthContext } from "../components/context";
 
+import { createTwoButtonAlert, widthPercentageToDP, heightPercentageToDP } from '../../Config/snippets'
+
 export default props => {
-  
+
   const navigation = useNavigation();
-  const {signIn} = React.useContext(AuthContext);
+  const { signIn } = React.useContext(AuthContext);
+
+  
 
   let register = () => {
-    navigation.replace("Register");
+  //  navigation.replace("Register");
+    val = createTwoButtonAlert("teste 1", "teste 2")
+    console.log(val)
   };
 
 
@@ -17,7 +24,7 @@ export default props => {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined} keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}>
       <ScrollView style={styles.container}>
         <View>
-          <View style={{ marginTop: "30%", alignItems: "center", justifyContent: "center" }}>
+          <View style={{ marginTop: heightPercentageToDP('7%'), alignItems: "center", justifyContent: "center" }}>
             <Image source={require("../images/mapa.png")} style={styles.logo} />
           </View>
 
@@ -25,27 +32,29 @@ export default props => {
             <View style={styles.form}>
               <Text style={styles.inputTitle}>Email</Text>
               <TextInput style={styles.input} />
-              <View style={{ borderBottomColor: "#05164B", borderBottomWidth: 2 }} />
+              <View style={styles.inputUnder} />
             </View>
 
             <View style={styles.form}>
               <Text style={[styles.inputTitle, styles.password]}>Password</Text>
               <TextInput secureTextEntry={true} style={styles.input} />
-              <View style={{ borderBottomColor: "#05164B", borderBottomWidth: 2 }} />
+              <View style={styles.inputUnder} />
             </View>
           </View>
 
-          <View>
-            <TouchableOpacity style={styles.button}>
-              <Text style={styles.btnText} onPress={()=> {signIn()}}>LOGIN</Text>
-            </TouchableOpacity>
-          </View>
+          <View style={styles.btnGroup}>
+            <View>
+              <TouchableOpacity style={styles.button}>
+                <Text style={styles.btnText} onPress={() => { signIn() }}>LOGIN</Text>
+              </TouchableOpacity>
+            </View>
 
-          <View style={styles.dontHaveAccount}>
-            <Text style={styles.textCreate}>Ainda não tens conta?</Text>
-            <Text style={[styles.textCreate, styles.create]} onPress={register}>
-              Criar Conta
-            </Text>
+            <View style={styles.dontHaveAccount}>
+              <Text style={styles.textCreate}>Ainda não tens conta?</Text>
+              <Text style={[styles.textCreate, styles.create]} onPress={register}>
+                Criar Conta
+              </Text>
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -53,40 +62,42 @@ export default props => {
   );
 };
 
-const SCREEN_WIDTH = Dimensions.get("window").width;
-const SCREEN_HEIGHT = Dimensions.get("window").height;
+
+
+
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingHorizontal: 30,
+    paddingHorizontal: '10%',
   },
   logo: {
-    width: SCREEN_WIDTH / 2.3,
     resizeMode: "contain",
+    maxWidth: '50%'
   },
   formInputs: {
-    marginTop: "15%",
+    marginTop: heightPercentageToDP("15%"),
   },
   form: {
     marginHorizontal: 20,
-    marginTop: "10%",
+    marginTop: heightPercentageToDP('1%'),
   },
   input: {
-    height: 40,
-    fontSize: 15,
+    height: heightPercentageToDP('5%'),
+    fontSize: RFValue(15),
+
   },
   inputTitle: {
     color: "#707070",
-    fontSize: 25,
+    fontSize: RFValue(18),
     fontWeight: "bold",
   },
   password: {
-    marginTop: "10%",
+    marginTop: heightPercentageToDP('5%'),
   },
   button: {
-    marginTop: "30%",
+    marginTop: heightPercentageToDP('15%'),
     height: 50,
     alignItems: "center",
     backgroundColor: "#05164B",
@@ -97,14 +108,14 @@ const styles = StyleSheet.create({
   },
   btnText: {
     color: "#fff",
-    fontSize: 25,
+    fontSize: RFValue(20),
     fontWeight: "bold",
   },
   textCreate: {
     fontWeight: "bold",
-    marginTop: "5%",
+    marginTop: heightPercentageToDP('5%'),
     color: "#707070",
-    fontSize: 20,
+    fontSize: RFValue(15),
     textAlign: "center",
   },
   dontHaveAccount: {
@@ -118,4 +129,8 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     textDecorationLine: "underline",
   },
+  inputUnder: {
+    borderBottomColor: "#05164B",
+     borderBottomWidth: 2
+  }
 });
