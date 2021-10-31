@@ -15,10 +15,6 @@ export default class Tavbar extends React.Component {
     //posso trabalhar aqui dentro com 
 
 
-    componentWillUnmount()  {
-        console.log("crash")
-    }
-
 
    barIcon = (icon, size) => {
     return {
@@ -35,6 +31,7 @@ export default class Tavbar extends React.Component {
         <NavigationContainer>
           <Tab.Navigator
             screenOptions={{
+                
               tabBarShowLabel: false,
               headerShown: false,
               tabBarStyle: [

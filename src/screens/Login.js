@@ -34,20 +34,20 @@ export default (props) => {
     navigation.replace("ResetPassword");
   };
 
- /* useEffect(() => {
+  useEffect(() => {
    
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         setIsLoading(true);
         setTimeout(() => {
           setIsLoading(false);
-          normalAlert("Where Is It", "Bem Vindo ", "Ok");
+        //  normalAlert("Where Is It", "Bem Vindo ", "Ok");
           signIn();
         }, 1000);
       }
     });
     return unsubscribe;
-  }, []);*/
+  }, []);
 
   const validate = (text) => {
     let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
@@ -88,13 +88,11 @@ export default (props) => {
                 .doc(user.uid)
                 .get()
                 .then(async (documentSnapshot) => {
-                  const data = documentSnapshot.data();
-                
+                  const data = documentSnapshot.data();      
                   saveData('name', data.name.toString())
-
                   setTimeout(() => {
                     setIsLoading(false);
-                    normalAlert("Where Is It", "Bem Vindo " + data.name, "Ok");
+                    //normalAlert("Where Is It", "Bem Vindo " + data.name, "Ok");
                     signIn();
                   }, 1000);
                 });
