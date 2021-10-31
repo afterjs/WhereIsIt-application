@@ -1,12 +1,17 @@
 import { useNavigation } from "@react-navigation/native";
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, ScrollView, Image, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Alert } from "react-native";
+import { StyleSheet, View, ScrollView, Image, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, LogBox } from "react-native";
 import { AuthContext } from "../components/context";
-import { widthPercentageToDP, heightPercentageToDP } from "../../Config/snippets";
+import {heightPercentageToDP } from "../../Config/snippets";
 import { auth, database } from "../../Config/firebase";
 import { normalAlert } from "../components/Alerts";
 import Loader from "../components/Loader";
+
+
+LogBox.ignoreLogs(['AsyncStorage has been extracted from react-native core and will be removed in a future release.']);
+LogBox.ignoreLogs(['Setting a timer']); 
+
 
 export default (props) => {
   const navigation = useNavigation();
@@ -22,6 +27,21 @@ export default (props) => {
   let register = () => {
     navigation.replace("Register");
   };
+
+  useEffect(() => {
+   
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setIsLoading(true);
+        setTimeout(() => {
+          setIsLoading(false);
+          normalAlert("Where Is It", "Bem Vindo ", "Ok");
+          signIn();
+        }, 1000);
+      }
+    });
+    return unsubscribe;
+  }, []);
 
   const validate = (text) => {
     let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
