@@ -8,10 +8,7 @@ import { auth, database } from "../../Config/firebase";
 import { heightPercentageToDP } from "../../Config/snippets";
 import Loader from "../components/Loader";
 
-
-
 export default (props) => {
-
   const navigation = useNavigation();
 
   const [name, setName] = useState("");
@@ -22,7 +19,7 @@ export default (props) => {
   const [isValidPassword, setisValidPassword] = useState(true);
   const [isChecked, setChecked] = useState(false);
   const [btn, setBtn] = useState(false);
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   let login = () => {
     navigation.replace("Login");
@@ -42,40 +39,39 @@ export default (props) => {
   };
 
   const validatePassword = () => {
-    var passwordSize = password.trim().length
-    
+    var passwordSize = password.trim().length;
 
-    password !== '' && passwordSize<6 ? 
-    normalAlert("Nova Conta", "A password precisa de ter pelo menos 6 caracteres", "Verificar")
-    : password.trim() !== confirmPassword.trim() ? setisValidPassword(false) : setisValidPassword(true);
-
-
+    password !== "" && passwordSize < 6 ? normalAlert("Nova Conta", "A password precisa de ter pelo menos 6 caracteres", "Verificar") : password.trim() !== confirmPassword.trim() ? setisValidPassword(false) : setisValidPassword(true);
   };
 
   const handleSignUp = () => {
     var valid = isAllValid();
 
-    valid ? 
-      
-          auth
+    valid
+      ? auth
           .createUserWithEmailAndPassword(email, password)
           .then((userCreadentials) => {
             const user = userCreadentials.user;
-            const docRef = database.collection('users').doc(user.uid)
-            
-            docRef.set({
-              name: name,
-              email: user.email,
-              map: false,
-              permissions: 0
-            }).then(async t => {
-              user.sendEmailVerification(); 
-              setTimeout(()=> {
-                setIsLoading(false);
-                normalAlert("Nova Conta", "Conta Criada com Sucesso! Bem Vindo a Equipa 😎", "Ok");
-                login()
-              }, 1000)
-            })
+            const docRef = database.collection("users").doc(user.uid);
+
+            docRef
+              .set({
+                name: name,
+                email: user.email,
+                map: false,
+                permissions: 0,
+              })
+              .then(async (t) => {
+                user.sendEmailVerification();
+                setTimeout(() => {
+                  setIsLoading(false);
+                  normalAlert("Nova Conta", "Conta Criada com Sucesso! Não te esqueças de verificar o teu email 😎", "Ok");
+                  auth.signOut().then(() => {
+                    login();
+                    console.log("fez logout")
+                  });
+                }, 1000);
+              });
           })
           .catch((error) => {
             if (error.code === "auth/email-already-in-use") {
@@ -85,7 +81,6 @@ export default (props) => {
             console.log(error.message);
             setBtn(false);
           })
-          
       : normalAlert("Nova Conta", "Verifica se todos os campos estão corretos!", "Verificar");
   };
 
@@ -97,19 +92,14 @@ export default (props) => {
     console.log("isValidPassword - " + isValidPassword);
     console.log("isChecked - " + isChecked);
 
-    name.trim() !== "" && isValidEmail && isValidPassword && isChecked ? (valid = true, setBtn(true)) : (valid = false);
-    setIsLoading(true)
+    name.trim() !== "" && isValidEmail && isValidPassword && isChecked ? ((valid = true), setBtn(true)) : (valid = false);
+    setIsLoading(true);
     return valid;
   };
 
-
-
-  if(isLoading) {
-    return(
-     <Loader text={"A criar a conta... 🥳"}/>
-    )
+  if (isLoading) {
+    return <Loader text={"A criar a conta... 🥳"} />;
   }
-
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined} keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}>
@@ -179,7 +169,9 @@ export default (props) => {
 
           <View style={styles.dontHaveAccount}>
             <Text style={styles.textCreate}>Já tens conta?</Text>
-            <Text style={[styles.textCreate, styles.create]} onPress={login}>Login</Text>
+            <Text style={[styles.textCreate, styles.create]} onPress={login}>
+              Login
+            </Text>
           </View>
         </View>
       </ScrollView>

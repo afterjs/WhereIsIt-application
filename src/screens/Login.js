@@ -28,7 +28,7 @@ export default (props) => {
     navigation.replace("Register");
   };
 
-  useEffect(() => {
+ /* useEffect(() => {
    
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
@@ -41,7 +41,7 @@ export default (props) => {
       }
     });
     return unsubscribe;
-  }, []);
+  }, []);*/
 
   const validate = (text) => {
     let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
