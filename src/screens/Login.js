@@ -1,10 +1,13 @@
 import { useNavigation } from "@react-navigation/native";
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
-import React, { useState } from "react";
+import React, { useState, useEffect} from "react";
 import { StyleSheet, View,  ScrollView, Image, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Alert } from "react-native";
 import { AuthContext } from "../components/context";
+import { widthPercentageToDP, heightPercentageToDP } from '../../Config/snippets'
+import { auth, database } from "../../Config/firebase";
+import { normalAlert } from "../components/Alerts";
+import Loader from "../components/Loader";
 
-import { createTwoButtonAlert, widthPercentageToDP, heightPercentageToDP } from '../../Config/snippets'
 
 export default props => {
 
@@ -12,14 +15,73 @@ export default props => {
   const { signIn } = React.useContext(AuthContext);
 
 
-   
+  const [email, setEmail] = useState("");
+  const [btn, btnStatus] = useState(false)
+  const [isValidEmail, setisValidEmail] = useState(true);
+  const [password, setPassword] = useState("");
+
+  const [isLoading, setIsLoading] = useState(false)
   
 
   let register = () => {
    navigation.replace("Register");
-    //val = createTwoButtonAlert("teste 1", "teste 2")
-   // console.log(val)
   };
+
+
+  const validate = (text) => {
+    let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
+    if (reg.test(text) === false) {
+      setEmail(text.trim());
+      setisValidEmail(false);
+      return false;
+    } else {
+      setEmail(text.trim());
+      setisValidEmail(true);
+      return true;
+    }
+  };
+
+  const handleLogin = () => {
+
+
+    isValidEmail && password !== '' ?
+    auth
+      .signInWithEmailAndPassword(email, password)
+      .then((userCreadentials) => {
+        btnStatus(true)
+        const user = userCreadentials.user;
+
+        setIsLoading(true)
+       
+     
+
+        const docRef = database.collection('users')
+            .doc(user.uid)
+            .get()
+            .then(async documentSnapshot => {
+              const data = documentSnapshot.data()
+              setTimeout(()=> {
+                setIsLoading(false);
+                normalAlert("Where Is It", "Bem Vindo " + data.name, "Ok")
+                signIn()
+              }, 1000)
+            
+            })
+
+      })
+      .catch((error) => {
+        console.log(error.message);
+        normalAlert("Login", "A password é invalida ou o email não existe", "Verificar")
+      })
+      : normalAlert("Login", "Tens de preencher todos os campos!", "Verificar")
+  };
+
+
+  if(isLoading) {
+    return(
+     <Loader text={"A fazer login... 😎"}/>
+    )
+  }
 
 
   return (
@@ -33,21 +95,22 @@ export default props => {
           <View style={styles.formInputs}>
             <View style={styles.form}>
               <Text style={styles.inputTitle}>Email</Text>
-              <TextInput style={styles.input} />
+              <TextInput style={styles.input} value={email} onChangeText={(text) => validate(text)}/>
               <View style={styles.inputUnder} />
+              <Text style={!isValidEmail ? styles.notValid : styles.isValid}>Email Invalido</Text>
             </View>
 
             <View style={styles.form}>
               <Text style={[styles.inputTitle, styles.password]}>Password</Text>
-              <TextInput secureTextEntry={true} style={styles.input} />
+              <TextInput secureTextEntry={true} style={styles.input} value={password} onChangeText={(text)=>{setPassword(text)}}/>
               <View style={styles.inputUnder} />
             </View>
           </View>
 
           <View style={styles.btnGroup}>
             <View>
-              <TouchableOpacity style={styles.button}>
-                <Text style={styles.btnText} onPress={() => { signIn() }}>LOGIN</Text>
+              <TouchableOpacity style={styles.button} onPress={ handleLogin } disabled={btn}>
+                <Text style={styles.btnText} >LOGIN</Text>
               </TouchableOpacity>
             </View>
 
@@ -132,5 +195,20 @@ const styles = StyleSheet.create({
   inputUnder: {
     borderBottomColor: "#05164B",
      borderBottomWidth: 2
+  },
+  notValid: {
+    color: "red",
+    marginTop: heightPercentageToDP("1%"),
+  },
+  isValid: {
+    color: "red",
+    marginTop: heightPercentageToDP("1%"),
+    opacity: 0,
+    height: 0,
+  },
+  textWait: {
+    fontSize: RFValue(15),
+    fontWeight: 'bold',
+    marginTop: heightPercentageToDP("3%"),
   }
 });

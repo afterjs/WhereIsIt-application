@@ -6,14 +6,12 @@ import Checkbox from "expo-checkbox";
 import { normalAlert } from "../components/Alerts";
 import { auth, database } from "../../Config/firebase";
 import { heightPercentageToDP } from "../../Config/snippets";
+import Loader from "../components/Loader";
 
-import { AuthContext } from "../components/context";
+
 
 export default (props) => {
 
-
-
-  const { signIn } = React.useContext(AuthContext);
   const navigation = useNavigation();
 
   const [name, setName] = useState("");
@@ -24,6 +22,7 @@ export default (props) => {
   const [isValidPassword, setisValidPassword] = useState(true);
   const [isChecked, setChecked] = useState(false);
   const [btn, setBtn] = useState(false);
+  const [isLoading, setIsLoading] = useState(false)
 
   let login = () => {
     navigation.replace("Login");
@@ -63,27 +62,33 @@ export default (props) => {
           .then((userCreadentials) => {
             const user = userCreadentials.user;
             const docRef = database.collection('users').doc(user.uid)
-
+            
             docRef.set({
               name: name,
               email: user.email,
               map: false,
               permissions: 0
-            }) 
-
-            normalAlert("Nova Conta", "Conta Criada com Sucesso! Bem Vindo a Equipa 😎", "Ok");
-            login()
+            }).then(async t => {
+              
+              setTimeout(()=> {
+                setIsLoading(false);
+                normalAlert("Nova Conta", "Conta Criada com Sucesso! Bem Vindo a Equipa 😎", "Ok");
+                login()
+              }, 1000)
+            })
             
 
 
+            
+           
 
+           
           })
           .catch((error) => {
             if (error.code === "auth/email-already-in-use") {
               normalAlert("Nova Conta", "O email já se encontra em uso! Tenta com outro email!", "Verificar");
             }
 
-           
             console.log(error.message);
             setBtn(false);
           })
@@ -100,8 +105,18 @@ export default (props) => {
     console.log("isChecked - " + isChecked);
 
     name.trim() !== "" && isValidEmail && isValidPassword && isChecked ? (valid = true, setBtn(true)) : (valid = false);
+    setIsLoading(true)
     return valid;
   };
+
+
+
+  if(isLoading) {
+    return(
+     <Loader text={"A criar a conta... 🥳"}/>
+    )
+  }
+
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined} keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}>
