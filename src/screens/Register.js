@@ -69,20 +69,13 @@ export default (props) => {
               map: false,
               permissions: 0
             }).then(async t => {
-              
+              user.sendEmailVerification(); 
               setTimeout(()=> {
                 setIsLoading(false);
                 normalAlert("Nova Conta", "Conta Criada com Sucesso! Bem Vindo a Equipa 😎", "Ok");
                 login()
               }, 1000)
             })
-            
-
-
-            
-           
-
-           
           })
           .catch((error) => {
             if (error.code === "auth/email-already-in-use") {
