@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import Login from "../screens/Login";
 import Register from "../screens/Register";
+import ResetPassword from "../screens/ResetPassword";
 
 const Stack = createNativeStackNavigator();
 
@@ -17,20 +18,8 @@ export default (props) => {
         }}
       >
         <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen
-          name="Register"
-          options={{
-            title: "My home",
-            headerStyle: {
-              backgroundColor: "#f4511e",
-            },
-            headerTintColor: "#fff",
-            headerTitleStyle: {
-              fontWeight: "bold",
-            },
-          }}
-          component={Register}
-        />
+        <Stack.Screen name="Register" component={Register} />
+        <Stack.Screen name="ResetPassword" component={ResetPassword} />
       </Stack.Navigator>
     </NavigationContainer>
   );

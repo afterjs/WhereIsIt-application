@@ -7,6 +7,7 @@ import {heightPercentageToDP } from "../../Config/snippets";
 import { auth, database } from "../../Config/firebase";
 import { normalAlert } from "../components/Alerts";
 import Loader from "../components/Loader";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 LogBox.ignoreLogs(['AsyncStorage has been extracted from react-native core and will be removed in a future release.']);
@@ -21,11 +22,16 @@ export default (props) => {
   const [btn, btnStatus] = useState(false);
   const [isValidEmail, setisValidEmail] = useState(true);
   const [password, setPassword] = useState("");
+  const [forgotPassword, setForgotPassword] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
 
   let register = () => {
     navigation.replace("Register");
+  };
+
+  let resetPassword = () => {
+    navigation.replace("ResetPassword");
   };
 
  /* useEffect(() => {
@@ -56,6 +62,8 @@ export default (props) => {
     }
   };
 
+  var counter = 0
+
   const handleLogin = () => {
     isValidEmail && password !== ""
       ? auth
@@ -73,6 +81,7 @@ export default (props) => {
                 .get()
                 .then(async (documentSnapshot) => {
                   const data = documentSnapshot.data();
+                  
                   setTimeout(() => {
                     setIsLoading(false);
                     normalAlert("Where Is It", "Bem Vindo " + data.name, "Ok");
@@ -91,6 +100,17 @@ export default (props) => {
           })
           .catch((error) => {
             console.log(error.message);
+            
+             counter++
+             
+
+              counter >= 2 
+              ? setForgotPassword(true)
+              : setForgotPassword(false)
+            
+             
+            
+           
             normalAlert("Login", "A password é invalida ou o email não existe", "Verificar");
           })
       : normalAlert("Login", "Tens de preencher todos os campos!", "Verificar");
@@ -127,6 +147,13 @@ export default (props) => {
                 }}
               />
               <View style={styles.inputUnder} />
+
+              <View style={forgotPassword ? styles.ShowforgotPasswordView : styles.HideforgotPasswordView} >
+              <Text style={styles.forgotPassword}>Não sabes a password?</Text>
+              <Text style={[styles.forgotPassword, styles.create]} onPress={resetPassword}>
+                Recuperar
+              </Text>
+            </View>
             </View>
           </View>
 
@@ -180,7 +207,7 @@ const styles = StyleSheet.create({
     marginTop: heightPercentageToDP("5%"),
   },
   button: {
-    marginTop: heightPercentageToDP("15%"),
+    marginTop: heightPercentageToDP("10%"),
     height: 50,
     alignItems: "center",
     backgroundColor: "#05164B",
@@ -207,6 +234,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     color: "#30A24B",
   },
+  ShowforgotPasswordView: {
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    color: "#30A24B",
+    
+  },
+
+  HideforgotPasswordView: {
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    color: "#30A24B",
+    opacity: 0,
+    height: 0,
+  },
+
   create: {
     color: "#30A24B",
     paddingLeft: 10,
@@ -231,4 +275,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginTop: heightPercentageToDP("3%"),
   },
+
+  forgotPassword: {
+    fontWeight: "bold",
+    marginTop: heightPercentageToDP("5%"),
+    color: "#707070",
+    fontSize: RFValue(15),
+    textAlign: "center",
+  },
+  
 });

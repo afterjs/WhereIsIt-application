@@ -5,14 +5,16 @@ import { AuthContext } from "../components/context";
 import MapView from 'react-native-maps';
 import whiteMode from "../../Config/whiteMode";
 import Markers from "../Layouts/Markers";
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default props => {
- 
+
+
 
     return (
       <View style={styles.container}>
-        <MapView
+      
+      { /* <MapView
         customMapStyle={whiteMode}
           style={styles.mapStyle}
           initialRegion={{
@@ -27,7 +29,7 @@ export default props => {
         >
             <Markers/>
      
-        </MapView>
+        </MapView>*/}
       </View>
     
     )
