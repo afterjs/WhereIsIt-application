@@ -64,6 +64,14 @@ export default (props) => {
 
   var counter = 0
 
+  const saveData = async (key, value) => {
+    try {
+      await AsyncStorage.setItem(key, value)
+    } catch (error) {
+      alert(error)
+    }
+  }
+
   const handleLogin = () => {
     isValidEmail && password !== ""
       ? auth
@@ -81,7 +89,9 @@ export default (props) => {
                 .get()
                 .then(async (documentSnapshot) => {
                   const data = documentSnapshot.data();
-                  
+                
+                  saveData('name', data.name.toString())
+
                   setTimeout(() => {
                     setIsLoading(false);
                     normalAlert("Where Is It", "Bem Vindo " + data.name, "Ok");

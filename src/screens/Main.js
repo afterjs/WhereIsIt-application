@@ -14,7 +14,7 @@ export default props => {
     return (
       <View style={styles.container}>
       
-      { /* <MapView
+     <MapView
         customMapStyle={whiteMode}
           style={styles.mapStyle}
           initialRegion={{
@@ -29,7 +29,7 @@ export default props => {
         >
             <Markers/>
      
-        </MapView>*/}
+        </MapView>
       </View>
     
     )
