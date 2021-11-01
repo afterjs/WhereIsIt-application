@@ -1,51 +1,98 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, StyleSheet, Dimensions, SafeAreaView, TouchableOpacity } from "react-native";
+import { Text, View, StyleSheet, Dimensions, SafeAreaView, TouchableOpacity, Image } from "react-native";
 
 import { StatusBar } from "expo-status-bar";
-import * as Location from 'expo-location';
-import MapView from "react-native-maps";
+import * as Location from "expo-location";
+import MapView, { Marker } from "react-native-maps";
 import whiteMode from "../../Config/whiteMode";
 import Markers from "../Layouts/Markers";
+import WaitLocation from "../components/WaitLocation";
+import Loader from "../components/Loader";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import lixo from "../images/Icons/lixo-pin.png";
+import banco from "../images/Icons/caixa-pin.png";
+
+import { database } from "../../Config/firebase";
 
 export default (props) => {
   const [isActived, setIsActived] = useState(false);
-
   const [location, setLocation] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [lat, setLat] = useState(null);
+  const [long, setLong] = useState(null);
+
+  const [items, setItems] = useState([]);
 
   const getLoc = () => {
+    
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
         return;
       }
 
       let location = await Location.getCurrentPositionAsync({});
+
       setLocation(location);
+      setLat(location["coords"]["latitude"]);
+      setLong(location["coords"]["longitude"]);
+      setIsActived(true);
+      setIsLoading(true);
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 2000);
     })();
   };
 
-  let text = 'Waiting..';
-  if (errorMsg) {
-    text = errorMsg;
-  } else if (location) {
-    text = JSON.stringify(location);
+  const loadMarkers = () => {
+    database
+      .collection("pinsData")
+      .get()
+      .then((querySnapShot) => {
+        querySnapShot.forEach((documentSnapshot) => {
+          items.push(documentSnapshot.data());
+        });
+      });
+  };
+
+  let imageResolve = (img) => {
+    if (img.trim() === "lixo") {
+      return lixo;
+    } else if (img.trim() === "banco") {
+      return banco;
+    }
+  };
+
+  function createMarker() {
+    return items.map((marker, index) => (
+      <Marker
+        key={index}
+        coordinate={{
+          latitude: marker.loc.latitude,
+          longitude: marker.loc.longitude,
+        }}
+        title={marker.title}
+        description={marker.description}
+      >
+        <Image source={imageResolve(marker.type)} style={{ height: 41, width: 28 }} />
+      </Marker>
+    ));
   }
 
-  if (!isActived) {
-    return (
-      <View style={styles.container}>
-        <Text>{text}</Text>
+  useEffect(() => {
+    console.log("atualuizar")
+    loadMarkers();
+  }, []);
 
-        <TouchableOpacity
-        style={styles.button}
-        onPress={getLoc}
-      >
-        <Text>Press Here</Text>
-      </TouchableOpacity>
-      </View>
-    );
+   
+
+  if (!isActived) {
+    return <WaitLocation loc={getLoc} />;
+  }
+
+  if (isLoading) {
+    return <Loader text={"A procura da localização... 🛰️"} />;
   }
 
   return (
@@ -54,16 +101,16 @@ export default (props) => {
         customMapStyle={whiteMode}
         style={styles.mapStyle}
         initialRegion={{
-          latitude: 41.695174467275805,
-          longitude: -8.834282105916813,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
+          latitude: lat,
+          longitude: long,
+          latitudeDelta: 0.0243,
+          longitudeDelta: 0.0234,
         }}
         onLongPress={(e) => {
           console.log(e);
         }}
       >
-        <Markers />
+        {createMarker()}
       </MapView>
       <StatusBar style="auto" />
     </View>
@@ -80,10 +127,5 @@ const styles = StyleSheet.create({
   mapStyle: {
     flex: 1,
     width: Dimensions.get("window").width,
-  },
-  button: {
-    alignItems: "center",
-    backgroundColor: "#DDDDDD",
-    padding: 10
   },
 });
