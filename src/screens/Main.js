@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Dimensions, SafeAreaView, TouchableOpacity, Image, Text } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import MapView, { Marker } from "react-native-maps";
+import { Marker } from "react-native-maps";
+import MapView from "react-native-map-clustering";
 import whiteMode from "../../Config/whiteMode";
 import lixo from "../images/Icons/lixo-pin.png";
 import banco from "../images/Icons/caixa-pin.png";
@@ -47,12 +48,10 @@ export default (props) => {
     var counter = 0;
     var data = [];
 
-  
-  
-    var range = 100;
+    var range = 30;
 
     if (zoom < 10) {
-      range = 600;
+      range = 500;
     }
 
     if (arr.length === 0) {
@@ -71,11 +70,9 @@ export default (props) => {
       });
     }
 
-    if(data.length!==0) {
+    if (data.length !== 0) {
       setPinsByLoc(data);
     }
-
-  
   };
 
   // let changePinsLoc = () => {
@@ -138,6 +135,7 @@ export default (props) => {
   return (
     <View style={styles.container}>
       <View>
+        <Text style={{ justifyContent: "center", fontSize: 20, alignItems: "center" }}>Zoom -> {zoom}</Text>
         <Text style={{ justifyContent: "center", fontSize: 20, alignItems: "center" }}>Latitude -> {Lat}</Text>
         <Text style={{ justifyContent: "center", fontSize: 20, alignItems: "center" }}>Longitude -> {Long}</Text>
         <Text style={{ justifyContent: "center", fontSize: 20, alignItems: "center" }}>
@@ -146,9 +144,12 @@ export default (props) => {
       </View>
 
       <MapView
+        clusterColor="#05164B"
+        clusterTextColor="white"
         showsUserLocation={true}
         showsMyLocationButton={true}
         followsUserLocation={true}
+        maxZoom={15}
         customMapStyle={whiteMode}
         style={[styles.mapStyle, { marginTop: top }]}
         initialRegion={{

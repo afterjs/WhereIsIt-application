@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Text, View, StyleSheet, Dimensions, SafeAreaView, TouchableOpacity, Image } from "react-native";
+import { useIsFocused } from '@react-navigation/native';
 
 import { StatusBar } from "expo-status-bar";
 import * as Location from "expo-location";
@@ -29,6 +30,7 @@ export default (props) => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
+        console.log("testeeee")
         return;
       }
 
@@ -44,6 +46,8 @@ export default (props) => {
       }, 2000);
     })();
   };
+
+
 
   const loadMarkers = () => {
     database
@@ -81,10 +85,17 @@ export default (props) => {
   }
 
   useEffect(() => {
-    console.log("atualuizar")
-    loadMarkers();
+    console.log("effect")
+   // loadMarkers();
   }, []);
 
+  const isFocused = useIsFocused();
+
+
+
+  if (isFocused) {
+   //do something
+  }
    
 
   if (!isActived) {
@@ -98,6 +109,7 @@ export default (props) => {
   return (
     <View style={styles.container}>
       <MapView
+        selectedClusterColor="red"
         customMapStyle={whiteMode}
         style={styles.mapStyle}
         initialRegion={{
@@ -111,7 +123,7 @@ export default (props) => {
         }}
       >
         {createMarker()}
-      </MapView>
+      </MapView> 
       <StatusBar style="auto" />
     </View>
   );
