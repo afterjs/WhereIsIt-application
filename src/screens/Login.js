@@ -49,6 +49,8 @@ export default (props) => {
     return unsubscribe;
   }, []);
 
+
+ 
   const validate = (text) => {
     let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
     if (reg.test(text) === false) {

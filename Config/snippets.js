@@ -1,5 +1,4 @@
-import { Dimensions, PixelRatio, Alert} from 'react-native'
-
+import { Dimensions, PixelRatio} from 'react-native'
 
 const widthPercentageToDP = widthPercent => {
     const screenWidth = Dimensions.get('window').width;

@@ -1,60 +1,39 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, StyleSheet, Dimensions, SafeAreaView, TouchableOpacity, Image } from "react-native";
-
+import { View, StyleSheet, Dimensions, SafeAreaView, TouchableOpacity, Image, Text } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import * as Location from "expo-location";
 import MapView, { Marker } from "react-native-maps";
 import whiteMode from "../../Config/whiteMode";
-import Markers from "../Layouts/Markers";
-import WaitLocation from "../components/WaitLocation";
-import Loader from "../components/Loader";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
 import lixo from "../images/Icons/lixo-pin.png";
 import banco from "../images/Icons/caixa-pin.png";
-
 import { database } from "../../Config/firebase";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { getDistance } from "geolib";
+import Loader from "../components/Loader";
 
 export default (props) => {
-  const [isActived, setIsActived] = useState(false);
-  const [location, setLocation] = useState(null);
+  const [pins, setPins] = useState([]);
+  const [pinsByLoc, setPinsByLoc] = useState([]);
+  const [zoom, setZoom] = useState(15);
   const [isLoading, setIsLoading] = useState(false);
-  const [lat, setLat] = useState(null);
-  const [long, setLong] = useState(null);
 
-  const [items, setItems] = useState([]);
+  const [Lat, setLat] = useState("41.695174467275805");
+  const [Long, setLong] = useState("-8.834282105916813");
 
-  const getLoc = () => {
-    
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        return;
-      }
+  var top = useSafeAreaInsets().top;
 
-      let location = await Location.getCurrentPositionAsync({});
+  function getPins() {
+    const ref = database.collection("pinsData");
 
-      setLocation(location);
-      setLat(location["coords"]["latitude"]);
-      setLong(location["coords"]["longitude"]);
-      setIsActived(true);
-      setIsLoading(true);
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 2000);
-    })();
-  };
-
-  const loadMarkers = () => {
-    database
-      .collection("pinsData")
-      .get()
-      .then((querySnapShot) => {
-        querySnapShot.forEach((documentSnapshot) => {
-          items.push(documentSnapshot.data());
-        });
+    ref.onSnapshot((querySnashot) => {
+      console.log("snap shot");
+      const items = [];
+      querySnashot.forEach((doc) => {
+        items.push(doc.data());
       });
-  };
+      setPins(items);
+      update(items);
+    });
+  }
 
   let imageResolve = (img) => {
     if (img.trim() === "lixo") {
@@ -64,8 +43,66 @@ export default (props) => {
     }
   };
 
+  let update = (arr) => {
+    var counter = 0;
+    var data = [];
+
+  
+  
+    var range = 100;
+
+    if (zoom < 10) {
+      range = 600;
+    }
+
+    if (arr.length === 0) {
+      console.log("dentro do pin");
+      pins.forEach((item) => {
+        if (distanceRange(item.loc.latitude, item.loc.longitude) < range) {
+          data.push(item);
+        }
+      });
+    } else {
+      console.log("dentro do arr");
+      arr.forEach((item) => {
+        if (distanceRange(item.loc.latitude, item.loc.longitude) < range) {
+          data.push(item);
+        }
+      });
+    }
+
+    if(data.length!==0) {
+      setPinsByLoc(data);
+    }
+
+  
+  };
+
+  // let changePinsLoc = () => {
+  //   var data = [];
+
+  //   var range = 100;
+
+  //   if (zoom < 10) {
+  //     range = 600;
+  //   }
+
+  //   pins.forEach((item) => {
+  //     if (distanceRange(item.loc.latitude, item.loc.longitude) < range) {
+  //       data.push(item);
+  //     }
+  //   });
+
+  //   if (data.length !== 0) {
+  //     setPinsByLoc(data);
+  //   }
+
+  // };
+
   function createMarker() {
-    return items.map((marker, index) => (
+    //marker function
+
+    return pinsByLoc.map((marker, index) => (
       <Marker
         key={index}
         coordinate={{
@@ -80,38 +117,59 @@ export default (props) => {
     ));
   }
 
-  useEffect(() => {
-    console.log("atualuizar")
-    loadMarkers();
-  }, []);
-
-   
-
-  if (!isActived) {
-    return <WaitLocation loc={getLoc} />;
+  function distanceRange(lat, long) {
+    var distance = getDistance({ latitude: Lat, longitude: Long }, { latitude: lat, longitude: long });
+    return parseInt(distance / 1000);
   }
 
+  useEffect(() => {
+    getPins();
+    setIsLoading(true);
+
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 3000);
+  }, []);
+
   if (isLoading) {
-    return <Loader text={"A procura da localização... 🛰️"} />;
+    return <Loader text={"A carregar o mapa.. 😎"} />;
   }
 
   return (
     <View style={styles.container}>
+      <View>
+        <Text style={{ justifyContent: "center", fontSize: 20, alignItems: "center" }}>Latitude -> {Lat}</Text>
+        <Text style={{ justifyContent: "center", fontSize: 20, alignItems: "center" }}>Longitude -> {Long}</Text>
+        <Text style={{ justifyContent: "center", fontSize: 20, alignItems: "center" }}>
+          Caixotes Pertos -> {pinsByLoc.length} | Total -> {pins.length}{" "}
+        </Text>
+      </View>
+
       <MapView
+        showsUserLocation={true}
+        showsMyLocationButton={true}
+        followsUserLocation={true}
         customMapStyle={whiteMode}
-        style={styles.mapStyle}
+        style={[styles.mapStyle, { marginTop: top }]}
         initialRegion={{
-          latitude: lat,
-          longitude: long,
+          latitude: 41.695174467275805,
+          longitude: -8.834282105916813,
           latitudeDelta: 0.0243,
           longitudeDelta: 0.0234,
         }}
-        onLongPress={(e) => {
-          console.log(e);
+        onLongPress={(e) => {}}
+        onRegionChangeComplete={(e) => {
+          setLat(e.latitude);
+          setLong(e.longitude);
+          update([]);
+
+          var t = parseInt(Math.log2(360 * (Dimensions.get("window").width / 256 / e.longitudeDelta)));
+          setZoom(t);
         }}
       >
         {createMarker()}
       </MapView>
+
       <StatusBar style="auto" />
     </View>
   );
@@ -125,7 +183,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   mapStyle: {
-    flex: 1,
     width: Dimensions.get("window").width,
+    // height: Dimensions.get("window").height,
+    height: "80%",
   },
 });
