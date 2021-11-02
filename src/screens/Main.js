@@ -149,6 +149,7 @@ export default (props) => {
         showsUserLocation={true}
         showsMyLocationButton={true}
         followsUserLocation={true}
+        toolbarEnabled={false}
         maxZoom={15}
         customMapStyle={whiteMode}
         style={[styles.mapStyle, { marginTop: top }]}
