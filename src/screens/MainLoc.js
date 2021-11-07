@@ -26,27 +26,57 @@ export default (props) => {
   const [items, setItems] = useState([]);
 
   const getLoc = () => {
-    
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        console.log("testeeee")
+      if (status !== 'granted') {
+        console.log("denied")
         return;
       }
-
+      
       let location = await Location.getCurrentPositionAsync({});
-
       setLocation(location);
-      setLat(location["coords"]["latitude"]);
-      setLong(location["coords"]["longitude"]);
-      setIsActived(true);
-      setIsLoading(true);
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 2000);
+      setIsActived(true)
+      setIsLoading(true)
+      setTimeout(()=> {
+        setIsLoading(false)
+      },3000)
     })();
+ 
   };
 
+
+  function tick() {
+    (async () => {
+
+    
+      const status = await Location.hasServicesEnabledAsync();
+
+      if (status) {
+        console.log("on")
+      } else {
+        setIsActived(false)
+      }
+    })();
+  }
+
+useEffect(() => {
+
+  (async () => {
+
+    
+    const status = await Location.hasServicesEnabledAsync();
+
+    if (status) {
+      console.log("onnnnn")
+    } else {
+      console.log("offf")
+    }
+  })();
+
+  setInterval(()=> {
+    tick();
+  }, 5000)
+}, [])
 
 
   const loadMarkers = () => {
@@ -84,17 +114,14 @@ export default (props) => {
     ));
   }
 
-  useEffect(() => {
-    console.log("effect")
-   // loadMarkers();
-  }, []);
+
 
   const isFocused = useIsFocused();
 
 
 
   if (isFocused) {
-   //do something
+    
   }
    
 
@@ -108,22 +135,7 @@ export default (props) => {
 
   return (
     <View style={styles.container}>
-      <MapView
-        selectedClusterColor="red"
-        customMapStyle={whiteMode}
-        style={styles.mapStyle}
-        initialRegion={{
-          latitude: lat,
-          longitude: long,
-          latitudeDelta: 0.0243,
-          longitudeDelta: 0.0234,
-        }}
-        onLongPress={(e) => {
-          console.log(e);
-        }}
-      >
-        {createMarker()}
-      </MapView> 
+      <Text>location: {JSON.stringify(location)}</Text>
       <StatusBar style="auto" />
     </View>
   );
