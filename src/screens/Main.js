@@ -12,24 +12,24 @@ import banco from "../images/Icons/caixa-pin.png";
 import { database } from "../../Config/firebase";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getDistance } from "geolib";
+import { useIsFocused } from '@react-navigation/native';
+
 
 
 export default (props) => {
+  
   const [waitLocation, setWaitLocation] = useState(true);
   const [location, setLocation] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [isBtnDisabled, setIsBtnDisabled] = useState(false);
   const [showBtn, setShowBtn] = useState(false);
-
-
   const [pins, setPins] = useState([]);
   const [pinsByLoc, setPinsByLoc] = useState([]);
   const [zoom, setZoom] = useState(15);
-
   const [Lat, setLat] = useState("41.695174467275805");
   const [Long, setLong] = useState("-8.834282105916813");
 
   var top = useSafeAreaInsets().top;
+  const isFocused = useIsFocused();
 
 
   let requestLoc = () => {
@@ -45,11 +45,13 @@ export default (props) => {
 
         try {
             let location = await Location.getCurrentPositionAsync({});
-            getPins();
-            setShowBtn(false);
-            setWaitLocation(false);
-            setLocation(location);
-
+            getPins().then((val)=> {
+              console.log("loaded")
+              setShowBtn(false);
+              setWaitLocation(false);
+              setLocation(location);
+            });
+           
         } catch (error) {
             setIsBtnDisabled(false);
             setShowBtn(true);
@@ -57,35 +59,9 @@ export default (props) => {
       })();
   };
  
-  let checkServiceGps = () => {
-    (async () => {
-      let { status } = await Location.getForegroundPermissionsAsync();
-      if (status === "granted") {
-        let serviceStatus = await Location.hasServicesEnabledAsync();
-        if (serviceStatus) {
-          getPins();
  
-          setTimeout(()=> {
-            setWaitLocation(false);
-          }, 2000)
-         
-          return;
-        } else {
-          setTimeout(()=> {
-            setShowBtn(true);
-          }, 2000)
-         
-        }
-      }
-      else {
-        setTimeout(()=> {
-          setShowBtn(true);
-        }, 2000)
-      }
-    })();
-  };
 
-  function getPins() {
+  let getPins = async () => {
     const ref = database.collection("pinsData");
 
     ref.onSnapshot((querySnashot) => {
@@ -96,6 +72,7 @@ export default (props) => {
       });
       setPins(items);
       update(items);
+      return true
     });
   }
 
@@ -108,7 +85,6 @@ export default (props) => {
   };
 
   let update = (arr) => {
-    var counter = 0;
     var data = [];
 
     var range = 30;
@@ -158,12 +134,40 @@ export default (props) => {
   }
 
 
-
+  let checkServiceGps = async () => {
+      let { status } = await Location.getForegroundPermissionsAsync();
+      if (status === "granted") {
+        let serviceStatus = await Location.hasServicesEnabledAsync();
+        if (serviceStatus) {
+          return  true;
+        } else {
+          return  false; 
+        }
+      }
+      else {
+        return  false;
+      }
+  };
 
 
 
   useEffect(() => {
-      checkServiceGps();
+    checkServiceGps().then((state) => {
+      if(state) {
+        getPins().then((val)=> {
+          setTimeout(()=> {
+            setWaitLocation(false);
+            test()
+          }, 1000)
+        });
+      } else {
+        setTimeout(()=> {
+          setShowBtn(true);
+        }, 2000)
+      }
+    })
+
+    
     return () => {
         console.log("clean up")
       };
