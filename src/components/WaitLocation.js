@@ -1,13 +1,12 @@
-import React from "react";
-import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
+import React, {useState} from "react";
+import { Text, View, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import { heightPercentageToDP } from "../../Config/snippets";
 
 
-
-
 export default (props) => {
 
+  
 
   let withBtn = () => {
     return (
@@ -30,6 +29,7 @@ export default (props) => {
   let withoutBtn = () => {
     return (
       <View style={styles.container}>
+          <ActivityIndicator size="large" color="#05164B" />
         <Text style={styles.textActive}>A carregar....</Text>
       </View>
     );  

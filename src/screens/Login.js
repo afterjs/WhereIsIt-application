@@ -93,8 +93,6 @@ export default (props) => {
                   const data = documentSnapshot.data();      
                   saveData('name', data.name.toString())
                   setTimeout(() => {
-                    setIsLoading(false);
-                    //normalAlert("Where Is It", "Bem Vindo " + data.name, "Ok");
                     signIn();
                   }, 1000);
                 });
