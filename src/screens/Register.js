@@ -68,13 +68,13 @@ export default (props) => {
                   normalAlert("Nova Conta", "Conta Criada com Sucesso! Não te esqueças de verificar o teu email 😎", "Ok");
                   auth.signOut().then(() => {
                     login();
-                    console.log("fez logout")
                   });
                 }, 1000);
               });
           })
           .catch((error) => {
             if (error.code === "auth/email-already-in-use") {
+              setIsLoading(false);
               normalAlert("Nova Conta", "O email já se encontra em uso! Tenta com outro email!", "Verificar");
             }
 
