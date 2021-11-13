@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Dimensions, Image, Text } from "react-native";
+import { View, StyleSheet, Dimensions, Image, Text, TouchableOpacity } from "react-native";
 import * as Location from "expo-location";
 import WaitLocation_Screen from "../components/WaitLocation";
-import Loader from "../components/Loader";
 import { StatusBar } from "expo-status-bar";
 import { Marker } from "react-native-maps";
 import MapView from "react-native-map-clustering";
@@ -13,53 +12,87 @@ import { database } from "../../Config/firebase";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getDistance } from "geolib";
 import { useIsFocused } from '@react-navigation/native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+import MapOptions from '../screens/MapOptions'
 
+let gpsChecker = false
 
 export default (props) => {
-  
+
   const [waitLocation, setWaitLocation] = useState(true);
-  const [location, setLocation] = useState(null);
-  const [isBtnDisabled, setIsBtnDisabled] = useState(false);
   const [showBtn, setShowBtn] = useState(false);
+  const [isMapLoaded, setIsMapLoaded] = useState(false)
   const [pins, setPins] = useState([]);
   const [pinsByLoc, setPinsByLoc] = useState([]);
   const [zoom, setZoom] = useState(15);
   const [Lat, setLat] = useState("41.695174467275805");
   const [Long, setLong] = useState("-8.834282105916813");
+  const [showOptions, setShowOptions] = useState(false)
 
   var top = useSafeAreaInsets().top;
+
+
   const isFocused = useIsFocused();
+
+
+
+  if (gpsChecker) {
+    clearInterval(gpsChecker);
+    gpsChecker = null
+  }
+
+  if (isFocused) {
+    if (isMapLoaded) {
+      gpsChecker = setInterval(async () => {
+
+        await checkServiceGps().then((val) => {
+          if (!val) {
+            setIsMapLoaded(false);
+            setShowBtn(true);
+            setWaitLocation(true);
+          }
+        })
+
+      }, 2000)
+    }
+  }
 
 
   let requestLoc = () => {
     (async () => {
-        setIsBtnDisabled(true);
-        setShowBtn(false);
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        
-        if (status !== 'granted') {
-          console.log('Permission to access location was denied');
-          return;
-        }
 
-        try {
-            let location = await Location.getCurrentPositionAsync({});
-            getPins().then((val)=> {
-              console.log("loaded")
-              setShowBtn(false);
-              setWaitLocation(false);
-              setLocation(location);
-            });
-           
-        } catch (error) {
-            setIsBtnDisabled(false);
-            setShowBtn(true);
-        }
-      })();
+      setShowBtn(false);
+      let { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (status !== 'granted') {
+        setShowBtn(true);
+        return;
+      }
+
+      try {
+        let location = await Location.getCurrentPositionAsync({});
+        getPins().then((val) => {
+          setTimeout(() => {
+            setIsMapLoaded(true);
+            setWaitLocation(false);
+
+
+            setLat(JSON.stringify(location.coords.latitude))
+            setLong(JSON.stringify(location.coords.longitude))
+
+          }, 1000);
+        });
+
+      } catch (error) {
+
+        setShowBtn(true);
+      }
+    })();
   };
- 
- 
+
+
+
 
   let getPins = async () => {
     const ref = database.collection("pinsData");
@@ -100,7 +133,6 @@ export default (props) => {
         }
       });
     } else {
-      console.log("dentro do arr");
       arr.forEach((item) => {
         if (distanceRange(item.loc.latitude, item.loc.longitude) < range) {
           data.push(item);
@@ -135,105 +167,138 @@ export default (props) => {
 
 
   let checkServiceGps = async () => {
-      let { status } = await Location.getForegroundPermissionsAsync();
-      if (status === "granted") {
-        let serviceStatus = await Location.hasServicesEnabledAsync();
-        if (serviceStatus) {
-          return  true;
-        } else {
-          return  false; 
-        }
+    let { status } = await Location.getForegroundPermissionsAsync();
+    if (status === "granted") {
+      let serviceStatus = await Location.hasServicesEnabledAsync();
+      if (serviceStatus) {
+        return true;
+      } else {
+        return false;
       }
-      else {
-        return  false;
-      }
+    }
+    else {
+      return false;
+    }
   };
 
 
+  let changeScreenOption =  (boolOps, boolMap) => {
+     setShowOptions(boolOps)
+     setIsMapLoaded(boolMap);
+  }
 
   useEffect(() => {
+
     checkServiceGps().then((state) => {
-      if(state) {
-        getPins().then((val)=> {
-          setTimeout(()=> {
+      if (state) {
+        getPins().then((val) => {
+          setTimeout(() => {
+            setIsMapLoaded(true);
             setWaitLocation(false);
-            test()
           }, 1000)
         });
       } else {
-        setTimeout(()=> {
+        setTimeout(() => {
           setShowBtn(true);
         }, 2000)
       }
     })
 
-    
     return () => {
-        console.log("clean up")
-      };
+      console.log("clean up")
+    };
   }, [])
-  
+
   if (waitLocation) {
-    return <WaitLocation_Screen loc={requestLoc} touch={isBtnDisabled} screen={showBtn}/>;
+    return <WaitLocation_Screen loc={requestLoc} screen={showBtn} />;
+  }
+
+  if(showOptions) {
+    return <MapOptions/>
   }
 
 
   return (
+
+
     <View style={styles.container}>
-    <View>
-      <Text style={{ justifyContent: "center", fontSize: 20, alignItems: "center" }}>Zoom - {zoom}</Text>
-      <Text style={{ justifyContent: "center", fontSize: 20, alignItems: "center" }}>Latitude -{Lat}</Text>
-      <Text style={{ justifyContent: "center", fontSize: 20, alignItems: "center" }}>Longitude - {Long}</Text>
-      <Text style={{ justifyContent: "center", fontSize: 20, alignItems: "center" }}>
-        Caixotes Pertos - {pinsByLoc.length} | Total - {pins.length}{" "}
-      </Text>
+
+      <View
+        style={styles.item}
+      >
+        <TouchableOpacity
+        onPress={() => {
+          changeScreenOption(true, false)
+        }}
+        >
+          <MaterialCommunityIcons name="map-search-outline" size={30} color="red" />
+        </TouchableOpacity>
+
+      </View>
+      
+
+      <MapView
+        clusterColor="#05164B"
+        clusterTextColor="white"
+        showsUserLocation={true}
+        showsMyLocationButton={true}
+        followsUserLocation={true}
+        toolbarEnabled={false}
+        showsCompass={false}
+        maxZoom={15}
+        customMapStyle={whiteMode}
+        style={[styles.mapStyle, { marginTop: top }]}
+        initialRegion={{
+          latitude: parseFloat(Lat),
+          longitude: parseFloat(Long),
+          latitudeDelta: 0.0243,
+          longitudeDelta: 0.0234,
+        }}
+        onLongPress={(e) => { }}
+        onRegionChangeComplete={(e) => {
+          setLat(e.latitude);
+          setLong(e.longitude);
+          update([]);
+
+          var t = parseInt(Math.log2(360 * (Dimensions.get("window").width / 256 / e.longitudeDelta)));
+          setZoom(t);
+        }}
+      >
+        {createMarker()}
+      </MapView>
+
+      <StatusBar style="auto" />
     </View>
 
-    <MapView
-      clusterColor="#05164B"
-      clusterTextColor="white"
-      showsUserLocation={true}
-      showsMyLocationButton={true}
-      followsUserLocation={true}
-      toolbarEnabled={false}
-      maxZoom={15}
-      customMapStyle={whiteMode}
-      style={[styles.mapStyle, { marginTop: top }]}
-      initialRegion={{
-        latitude: 41.695174467275805,
-        longitude: -8.834282105916813,
-        latitudeDelta: 0.0243,
-        longitudeDelta: 0.0234,
-      }}
-      onLongPress={(e) => {}}
-      onRegionChangeComplete={(e) => {
-        setLat(e.latitude);
-        setLong(e.longitude);
-        update([]);
-
-        var t = parseInt(Math.log2(360 * (Dimensions.get("window").width / 256 / e.longitudeDelta)));
-        setZoom(t);
-      }}
-    >
-      {createMarker()}
-    </MapView>
-
-    <StatusBar style="auto" />
-  </View>
   );
 
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#fff",
-        alignItems: "center",
-        justifyContent: "center",
-      },
-      mapStyle: {
-        width: Dimensions.get("window").width,
-        // height: Dimensions.get("window").height,
-        height: "80%",
-      }
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 1,
+
+  },
+  mapStyle: {
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height,
+    // height: "80%",
+  },
+  item: {
+    justifyContent: "center",
+    alignItems: "center",
+    height: 40,
+    width: 40,
+    backgroundColor: 'white',
+    position: 'absolute',
+    top: 40,
+    left: 30,
+    zIndex: 1,
+    opacity: 0.5,
+  },
+
 });

@@ -6,41 +6,14 @@ import { heightPercentageToDP } from "../../Config/snippets";
 
 export default (props) => {
 
-  
 
-  let withBtn = () => {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.textActive}>Para um melhor funcionamento da aplicação, por favor ativa a localização no botão em baixo! 🤪</Text>
-  
-        <TouchableOpacity
-          style={ !props.touch ? styles.buttonActive : styles.buttonDesactive}
-          onPress={() => {
-            props.loc();
-          }}
-         
-        >
-          <Text style={styles.btnText}>Ativar Localização</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
-  let withoutBtn = () => {
     return (
       <View style={styles.container}>
           <ActivityIndicator size="large" color="#05164B" />
-        <Text style={styles.textActive}>A carregar....</Text>
+        <Text style={styles.textActive}>OPÇÕES....</Text>
       </View>
     );  
-  }
-
-
-  return(
-    props.screen 
-    ? withBtn()
-    : withoutBtn()
-  )
+  
  
 };
  
