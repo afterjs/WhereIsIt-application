@@ -11,61 +11,54 @@ import banco from "../images/Icons/caixa-pin.png";
 import { database } from "../../Config/firebase";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getDistance } from "geolib";
-import { useIsFocused } from '@react-navigation/native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useIsFocused } from "@react-navigation/native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-import MapOptions from '../screens/MapOptions'
+import MapOptions from "../screens/MapOptions";
 
-let gpsChecker = false
+let gpsChecker = false;
 
 export default (props) => {
-
   const [waitLocation, setWaitLocation] = useState(true);
   const [showBtn, setShowBtn] = useState(false);
-  const [isMapLoaded, setIsMapLoaded] = useState(false)
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [pins, setPins] = useState([]);
   const [pinsByLoc, setPinsByLoc] = useState([]);
   const [zoom, setZoom] = useState(15);
   const [Lat, setLat] = useState("41.695174467275805");
   const [Long, setLong] = useState("-8.834282105916813");
-  const [showOptions, setShowOptions] = useState(false)
+  const [showOptions, setShowOptions] = useState(false);
 
+  const [icon, setNewIcon] = useState("lixo");
   var top = useSafeAreaInsets().top;
-
 
   const isFocused = useIsFocused();
 
-
-
   if (gpsChecker) {
     clearInterval(gpsChecker);
-    gpsChecker = null
+    gpsChecker = null;
   }
 
   if (isFocused) {
     if (isMapLoaded) {
       gpsChecker = setInterval(async () => {
-
         await checkServiceGps().then((val) => {
           if (!val) {
             setIsMapLoaded(false);
             setShowBtn(true);
             setWaitLocation(true);
           }
-        })
-
-      }, 2000)
+        });
+      }, 2000);
     }
   }
 
-
   let requestLoc = () => {
     (async () => {
-
       setShowBtn(false);
       let { status } = await Location.requestForegroundPermissionsAsync();
 
-      if (status !== 'granted') {
+      if (status !== "granted") {
         setShowBtn(true);
         return;
       }
@@ -77,37 +70,31 @@ export default (props) => {
             setIsMapLoaded(true);
             setWaitLocation(false);
 
-
-            setLat(JSON.stringify(location.coords.latitude))
-            setLong(JSON.stringify(location.coords.longitude))
-
+            setLat(JSON.stringify(location.coords.latitude));
+            setLong(JSON.stringify(location.coords.longitude));
           }, 1000);
         });
-
       } catch (error) {
-
         setShowBtn(true);
       }
     })();
   };
 
-
-
-
   let getPins = async () => {
     const ref = database.collection("pinsData");
-
     ref.onSnapshot((querySnashot) => {
-      console.log("snap shot");
       const items = [];
       querySnashot.forEach((doc) => {
-        items.push(doc.data());
+          if (doc.data().type === icon) {
+            items.push(doc.data());
+          }
       });
+
       setPins(items);
       update(items);
-      return true
+      return true;
     });
-  }
+  };
 
   let imageResolve = (img) => {
     if (img.trim() === "lixo") {
@@ -154,7 +141,8 @@ export default (props) => {
           longitude: marker.loc.longitude,
         }}
         title={marker.title}
-        description={marker.description}>
+        description={marker.description}
+      >
         <Image source={imageResolve(marker.type)} style={{ height: 41, width: 28 }} />
       </Marker>
     ));
@@ -165,7 +153,6 @@ export default (props) => {
     return parseInt(distance / 1000);
   }
 
-
   let checkServiceGps = async () => {
     let { status } = await Location.getForegroundPermissionsAsync();
     if (status === "granted") {
@@ -175,67 +162,70 @@ export default (props) => {
       } else {
         return false;
       }
-    }
-    else {
+    } else {
       return false;
     }
   };
 
-
-  let changeScreenOption =  (boolOps, boolMap) => {
-     setShowOptions(boolOps)
-     setIsMapLoaded(boolMap);
-  }
+  let changeScreenOption = (boolOps, boolMap) => {
+    setShowOptions(boolOps);
+    setIsMapLoaded(boolMap);
+  };
 
   useEffect(() => {
-
     checkServiceGps().then((state) => {
       if (state) {
         getPins().then((val) => {
           setTimeout(() => {
             setIsMapLoaded(true);
             setWaitLocation(false);
-          }, 1000)
+          }, 1000);
         });
       } else {
         setTimeout(() => {
           setShowBtn(true);
-        }, 2000)
+        }, 2000);
       }
-    })
+    });
 
     return () => {
-      console.log("clean up")
+      console.log("clean up");
     };
-  }, [])
+  }, []);
+
+  let setIconType = (newIcon) => {
+    // passar o parametro como array
+     // setNewIcon(newIcon);
+    // setWaitLocation(true);
+   //changeScreenOption(false, true);
+
+    //getPins(newIcon).then((val) => {
+    //  setTimeout(() => {
+    //    setIsMapLoaded(true);
+    //  setWaitLocation(false);
+    // }, 1000);
+    //});
+  };
 
   if (waitLocation) {
     return <WaitLocation_Screen loc={requestLoc} screen={showBtn} />;
   }
 
-  if(showOptions) {
-    return <MapOptions/>
+  if (showOptions) {
+    return <MapOptions icon={icon} setIcon={setIconType} screen={changeScreenOption} />;
   }
 
-
   return (
-
-
     <View style={styles.container}>
-
-      <View
-        style={styles.item}
-      >
+      <View style={styles.item}>
         <TouchableOpacity
-        onPress={() => {
-          changeScreenOption(true, false)
-        }}
+          onPress={() => {
+            changeScreenOption(true, false);
+          }}
         >
           <MaterialCommunityIcons name="map-search-outline" size={30} color="red" />
         </TouchableOpacity>
-
       </View>
-      
 
       <MapView
         clusterColor="#05164B"
@@ -254,7 +244,7 @@ export default (props) => {
           latitudeDelta: 0.0243,
           longitudeDelta: 0.0234,
         }}
-        onLongPress={(e) => { }}
+        onLongPress={(e) => {}}
         onRegionChangeComplete={(e) => {
           setLat(e.latitude);
           setLong(e.longitude);
@@ -269,9 +259,7 @@ export default (props) => {
 
       <StatusBar style="auto" />
     </View>
-
   );
-
 };
 
 const styles = StyleSheet.create({
@@ -281,7 +269,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     elevation: 1,
-
   },
   mapStyle: {
     width: Dimensions.get("window").width,
@@ -293,12 +280,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     height: 40,
     width: 40,
-    backgroundColor: 'white',
-    position: 'absolute',
+    backgroundColor: "white",
+    position: "absolute",
     top: 40,
     left: 30,
     zIndex: 1,
     opacity: 0.5,
   },
-
 });

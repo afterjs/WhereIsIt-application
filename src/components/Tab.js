@@ -31,22 +31,27 @@ export default class Tavbar extends React.Component {
         <NavigationContainer>
           <Tab.Navigator
             screenOptions={{
-                
-              tabBarShowLabel: false,
+              tabBarLabelStyle: {
+                fontSize: 15,
+                fontWeight: 'bold'
+              },
+              tabBarShowLabel: true,
               headerShown: false,
               tabBarStyle: [
                 {
                   backgroundColor: "white",
                   position: "absolute",
                   height: 60,
+                  textAlign: 'center',
+                  fontSize : 50
                 },
                 null,
               ],
             }}
           >
-            <Tab.Screen name="Main" component={Main} options={this.barIcon("location-arrow", 30)} />
-            <Tab.Screen name="MapEditor" component={MapEditor} options={this.barIcon("map-marked-alt", 30)} />
-            <Tab.Screen name="Profile" component={Profile} options={this.barIcon("user-alt", 30)} />
+            <Tab.Screen name="Mapa" component={Main} options={this.barIcon("location-arrow", 30)} />
+            <Tab.Screen name="Editor" component={MapEditor} options={this.barIcon("map-marked-alt", 30)} />
+            <Tab.Screen name="Perfil" component={Profile} options={this.barIcon("user-alt", 30)} />
           </Tab.Navigator>
         </NavigationContainer>
       );
