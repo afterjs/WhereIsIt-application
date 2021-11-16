@@ -82,9 +82,16 @@ export default (props) => {
     })();
   };
 
+<<<<<<< HEAD
   let getPins = async (pinType) => {
     const ref = database.collection("pinsData");
     ref.onSnapshot((querySnashot) => {
+=======
+
+
+  let getPins = async () => {
+     database.collection("pinsData").onSnapshot((querySnashot) => {
+>>>>>>> ab01b30362cbd49fa96831b189100a7744183b0e
       const items = [];
       querySnashot.forEach((doc) => {
 
@@ -113,6 +120,8 @@ export default (props) => {
       return lixo;
     } else if (img.trim() === "banco") {
       return banco;
+    } else if (img.trim() === "ctt") {
+      return banco;
     }
   };
 
@@ -128,13 +137,18 @@ export default (props) => {
     if (arr.length === 0) {
       pins.forEach((item) => {
         if (distanceRange(item.loc.latitude, item.loc.longitude) < range) {
+         if(item.type === icon) {
           data.push(item);
+         }
+         
         }
       });
     } else {
       arr.forEach((item) => {
         if (distanceRange(item.loc.latitude, item.loc.longitude) < range) {
-          data.push(item);
+          if(item.type === icon) {
+            data.push(item);
+           }
         }
       });
     }
@@ -142,6 +156,34 @@ export default (props) => {
     if (data.length !== 0) {
       setPinsByLoc(data);
     }
+  };
+
+
+  let changePinMap = async (type) => {
+    console.log("type é - ", type)
+    var data = [];
+
+    var range = 30;
+
+    if (zoom < 10) {
+      range = 1000;
+    }
+
+      pins.forEach((item) => {
+        if (distanceRange(item.loc.latitude, item.loc.longitude) < range) {
+         if(item.type === type) {
+           console.log("inside")
+          data.push(item);
+         }
+         
+        }
+      });
+    
+    if (data.length !== 0) {
+      setPinsByLoc(data);
+    }
+
+    return true
   };
 
   function createMarker() {
@@ -206,6 +248,7 @@ export default (props) => {
   }, []);
 
   let setIconType = (newIcon) => {
+<<<<<<< HEAD
     setNewIconSelected(newIcon);
     setWaitLocation(true);
     changeScreenOption(false, true);
@@ -220,6 +263,26 @@ export default (props) => {
 
    
 
+=======
+   
+    changePinMap(newIcon).then((val)=> {
+      if(val) {
+        setNewIcon(newIcon);
+      }
+    })
+    changeScreenOption(false, true);
+    // passar o parametro como array
+     // setNewIcon(newIcon);
+    // setWaitLocation(true);
+   //changeScreenOption(false, true);
+
+    //getPins(newIcon).then((val) => {
+    //  setTimeout(() => {
+    //    setIsMapLoaded(true);
+    //  setWaitLocation(false);
+    // }, 1000);
+    //});
+>>>>>>> ab01b30362cbd49fa96831b189100a7744183b0e
   };
 
   let changeMapType = (map) => {
@@ -233,7 +296,11 @@ export default (props) => {
   }
 
   if (showOptions) {
+<<<<<<< HEAD
     return <MapOptions icon={iconSelected} setIcon={setIconType} screen={changeScreenOption}  map={mapType} changeMap={changeMapType}/>;
+=======
+    return <MapOptions icon={icon} setIconSelected={setIconType} screen={changeScreenOption} />;
+>>>>>>> ab01b30362cbd49fa96831b189100a7744183b0e
   }
 
   return (
