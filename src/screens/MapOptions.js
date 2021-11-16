@@ -10,84 +10,112 @@ export default (props) => {
 
   const opacity = { opacity: 0.3 };
 
-  const [lixoOpacity, setLixoOpacity] = useState(false);
-  const [bancoOpacity, setBancoOpacity] = useState(true);
-  const [cttOpacity, setCttOpacity] = useState(true);
+  const [lixoOpacity, setLixoOpacity] = useState(true);
+  const [bancoOpacity, setBancoOpacity] = useState(false);
+
+  const [sateliteOpacity, setSateliteOpacity] = useState(false);
+  const [defaultOpacity, setDefaultOpaciy] = useState(false);
 
   const [iconSelected, setIconSelected] = useState(props.icon);
+  const [mapSelected, setMapSelected] = useState(props.map);
 
   useEffect(() => {
     switch (props.icon) {
       case "lixo":
-        changeOpacityStates(false, true, true);
+        setLixoOpacity(false);
+        setBancoOpacity(true);
         break;
       case "banco":
-        changeOpacityStates(true, false, true);
+        setLixoOpacity(true);
+        setBancoOpacity(false);
         break;
-      case "ctt":
-        changeOpacityStates(true, true, false);
+    }
+
+    switch (props.map) {
+      case "standard":
+        setDefaultOpaciy(false);
+        setSateliteOpacity(true);
+        break;
+      case "satellite":
+        setDefaultOpaciy(true);
+        setSateliteOpacity(false);
+        break;
     }
     return () => {
       console.log("clear up");
     };
   }, []);
 
-  let changeOpacityStates = (state1, state2, state3) => {
-    setLixoOpacity(state1);
-    setBancoOpacity(state2);
-    setCttOpacity(state3);
-  };
+  //quando é escolhido tem de ser setado em falso, e o resto em true
 
   let returnPinBlockCode = () => {
     return (
-      <ScrollView style={styles.ScrollView}>
-        <View style={styles.imgGroup}>
-          <TouchableOpacity
-            onPress={() => {
-              changeOpacityStates(false, true, true);
-              setIconSelected('lixo');
-            }}
-          >
-            <View style={[styles.form, lixoOpacity ? opacity : { opacity: 1 }]}>
-              <Text style={styles.iconText}>LIXO</Text>
-              <Image source={require("../images/Icons/lixo-pin.png")} style={styles.icon} />
-            </View>
-          </TouchableOpacity>
+      <View style={styles.imgGroup}>
+        <TouchableOpacity
+          onPress={() => {
+            setLixoOpacity(false);
+            setBancoOpacity(true);
+            setIconSelected("lixo");
+          }}
+          disabled={!lixoOpacity ? true : false}
+        >
+          <View style={[styles.form, lixoOpacity ? opacity : { opacity: 1 }]}>
+            <Text style={styles.iconText}>LIXO</Text>
+            <Image source={require("../images/Icons/lixo-pin.png")} style={styles.icon} />
+          </View>
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => {
-              changeOpacityStates(true, false, true);
-              setIconSelected('banco');
-            }}
-          >
-            <View style={[styles.form, bancoOpacity ? opacity : { opacity: 1 }]}>
-              <Text style={styles.iconText}>Multibanco</Text>
-              <Image source={require("../images/Icons/caixa-pin.png")} style={styles.icon} />
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => {
-              changeOpacityStates(true, true, false);
-              setIconSelected('ctt');
-            }}
-          >
-            <View style={[styles.form, cttOpacity ? opacity : { opacity: 1 }]}>
-              <Text style={styles.iconText}>CTT</Text>
-              <Image source={require("../images/Icons/caixa-pin.png")} style={styles.icon} />
-            </View>
-          </TouchableOpacity>
-
-      
-
-         
-        </View>
-      </ScrollView>
+        <TouchableOpacity
+          onPress={() => {
+            setLixoOpacity(true);
+            setBancoOpacity(false);
+            setIconSelected("banco");
+          }}
+          disabled={!bancoOpacity ? true : false}
+        >
+          <View style={[styles.form, bancoOpacity ? opacity : { opacity: 1 }]}>
+            <Text style={styles.iconText}>Multibanco</Text>
+            <Image source={require("../images/Icons/caixa-pin.png")} style={styles.icon} />
+          </View>
+        </TouchableOpacity>
+      </View>
     );
   };
 
   let returnMapBlockCode = () => {
-    return <Text>Hello Map</Text>;
+    return (
+      <View style={styles.mapsGroup}>
+        <TouchableOpacity
+          onPress={() => {
+            setMapSelected("satellite");
+
+            setDefaultOpaciy(true);
+            setSateliteOpacity(false);
+          }}
+          disabled={!sateliteOpacity ? true : false}
+        >
+          <View style={[styles.mapView, sateliteOpacity ? opacity : { opacity: 1 }]}>
+            <Text style={styles.mapsTitle}>Mapa Satelite</Text>
+            <Image source={require("../images/Maps/satellite.png")} style={styles.map} />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            setMapSelected("standard");
+
+            setDefaultOpaciy(false);
+            setSateliteOpacity(true);
+          }}
+          disabled={!defaultOpacity ? true : false}
+        >
+          <View style={[styles.mapView, defaultOpacity ? opacity : { opacity: 1 }]}>
+            <Text style={styles.mapsTitle}>Mapa Predefenido</Text>
+            <Image source={require("../images/Maps/satellite.png")} style={styles.map} />
+          </View>
+        </TouchableOpacity>
+      </View>
+    );
   };
 
   let getCodeBlock = () => {
@@ -97,50 +125,71 @@ export default (props) => {
       return returnMapBlockCode();
     }
   };
-  
+
   let back = () => {
-    props.screen(false, true)   
-  }
+    props.screen(false, true);
+  };
 
   let changeIcon = () => {
     props.setIcon(iconSelected);
-  }
+  };
 
-  let btns = () => {
-    if (props.icon === iconSelected) {
-      return (
-        <View>
-          <TouchableOpacity style={styles.button}
-            onPress={()=> {
-              back()
-            }}
-          >
-            <Text style={styles.btnText}>Voltar</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    } else {
-      return(
-        <View style={styles.btns}>
-        <TouchableOpacity style={styles.buttonBottom}
-          onPress={()=> {
-            back()
+  let changeMap = () => {
+    props.changeMap(mapSelected);
+  };
+
+  let backButton = () => {
+    return (
+      <View>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            back();
+          }}
+        >
+          <Text style={styles.btnText}>Voltar</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  let confirm = (func) => {
+    return (
+      <View style={styles.btns}>
+        <TouchableOpacity
+          style={styles.buttonBottom}
+          onPress={() => {
+            back();
           }}
         >
           <Text style={styles.btnText}>Voltar</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buttonBottom}
+        <TouchableOpacity
+          style={styles.buttonBottom}
           onPress={() => {
-            changeIcon()
+            func();
           }}
-          
         >
           <Text style={styles.btnText}>Confirmar</Text>
         </TouchableOpacity>
       </View>
-      )
-     
+    );
+  };
+
+  let btns = () => {
+    if (choose === "pins") {
+      if (props.icon === iconSelected) {
+        return backButton();
+      } else {
+        return confirm(changeIcon);
+      }
+    } else {
+      if (props.map === mapSelected) {
+        return backButton();
+      } else {
+        return confirm(changeMap);
+      }
     }
   };
 
@@ -167,7 +216,9 @@ export default (props) => {
           <Text style={styles.btnText}>Mapa</Text>
         </TouchableOpacity>
       </View>
-      <View>{getCodeBlock()}</View>
+      <View>
+        <ScrollView style={styles.ScrollView}>{getCodeBlock()}</ScrollView>
+      </View>
 
       {btns()}
     </View>
@@ -189,7 +240,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: 10,
   },
-
   buttonBottom: {
     height: 50,
     width: "40%",
@@ -198,8 +248,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: 10,
   },
-
-
   buttonDesactive: {
     marginTop: heightPercentageToDP("5%"),
     height: 50,
@@ -220,6 +268,15 @@ const styles = StyleSheet.create({
     fontSize: RFValue(21),
     fontWeight: "bold",
     textAlign: "center",
+    marginBottom: 1,
+  },
+  mapsTitle: {
+    color: "#05164B",
+    fontSize: RFValue(21),
+    fontWeight: "bold",
+    textAlign: "center",
+    marginTop: heightPercentageToDP("3%"),
+    marginBottom: heightPercentageToDP("1%"),
   },
   btns: {
     flexDirection: "row",
@@ -234,11 +291,23 @@ const styles = StyleSheet.create({
     height: heightPercentageToDP("15%"),
     resizeMode: "contain",
   },
+  map: {
+    borderRadius: 5,
+    resizeMode: "contain",
+  },
   imgGroup: {
     justifyContent: "space-between",
     flexDirection: "row",
     flexWrap: "wrap",
     padding: "15%",
+  },
+  mapsGroup: {
+    flexDirection: "column",
+    justifyContent: "center",
+  },
+  mapView: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   form: {
     marginVertical: heightPercentageToDP("2%"),

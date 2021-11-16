@@ -5,7 +5,7 @@ import WaitLocation_Screen from "../components/WaitLocation";
 import { StatusBar } from "expo-status-bar";
 import { Marker } from "react-native-maps";
 import MapView from "react-native-map-clustering";
-import whiteMode from "../../Config/whiteMode";
+import tile from "../../Config/whiteMode";
 import lixo from "../images/Icons/lixo-pin.png";
 import banco from "../images/Icons/caixa-pin.png";
 import { database } from "../../Config/firebase";
@@ -28,8 +28,10 @@ export default (props) => {
   const [Lat, setLat] = useState("41.695174467275805");
   const [Long, setLong] = useState("-8.834282105916813");
   const [showOptions, setShowOptions] = useState(false);
+  const [iconSelected, setNewIconSelected] = useState("lixo");
+  const [mapType, setMapType] = useState("standard");
 
-  const [icon, setNewIcon] = useState("lixo");
+
   var top = useSafeAreaInsets().top;
 
   const isFocused = useIsFocused();
@@ -65,7 +67,7 @@ export default (props) => {
 
       try {
         let location = await Location.getCurrentPositionAsync({});
-        getPins().then((val) => {
+        getPins(null).then((val) => {
           setTimeout(() => {
             setIsMapLoaded(true);
             setWaitLocation(false);
@@ -80,14 +82,24 @@ export default (props) => {
     })();
   };
 
-  let getPins = async () => {
+  let getPins = async (pinType) => {
     const ref = database.collection("pinsData");
     ref.onSnapshot((querySnashot) => {
       const items = [];
       querySnashot.forEach((doc) => {
-          if (doc.data().type === icon) {
+
+        if(pinType===null) {
+          if (doc.data().type === iconSelected) {
+            console.log("ICON NULL - ", iconSelected)
             items.push(doc.data());
           }
+        } else {
+          if (doc.data().type === pinType) {
+            console.log("ICON MODIFIED- ", pinType)
+            items.push(doc.data());
+          }
+        }
+         
       });
 
       setPins(items);
@@ -175,7 +187,7 @@ export default (props) => {
   useEffect(() => {
     checkServiceGps().then((state) => {
       if (state) {
-        getPins().then((val) => {
+        getPins(null).then((val) => {
           setTimeout(() => {
             setIsMapLoaded(true);
             setWaitLocation(false);
@@ -194,25 +206,34 @@ export default (props) => {
   }, []);
 
   let setIconType = (newIcon) => {
-    // passar o parametro como array
-     // setNewIcon(newIcon);
-    // setWaitLocation(true);
-   //changeScreenOption(false, true);
+    setNewIconSelected(newIcon);
+    setWaitLocation(true);
+    changeScreenOption(false, true);
 
-    //getPins(newIcon).then((val) => {
-    //  setTimeout(() => {
-    //    setIsMapLoaded(true);
-    //  setWaitLocation(false);
-    // }, 1000);
-    //});
+  
+    getPins(newIcon).then((val) => {
+     setTimeout(() => {
+      setIsMapLoaded(true);
+      setWaitLocation(false);
+     }, 1000);
+    });
+
+   
+
   };
+
+  let changeMapType = (map) => {
+    setMapType(map)
+
+    console.log("New map setted -. " , map)
+  }
 
   if (waitLocation) {
     return <WaitLocation_Screen loc={requestLoc} screen={showBtn} />;
   }
 
   if (showOptions) {
-    return <MapOptions icon={icon} setIcon={setIconType} screen={changeScreenOption} />;
+    return <MapOptions icon={iconSelected} setIcon={setIconType} screen={changeScreenOption}  map={mapType} changeMap={changeMapType}/>;
   }
 
   return (
@@ -236,7 +257,8 @@ export default (props) => {
         toolbarEnabled={false}
         showsCompass={false}
         maxZoom={15}
-        customMapStyle={whiteMode}
+        customMapStyle={tile}
+        mapType={mapType}
         style={[styles.mapStyle, { marginTop: top }]}
         initialRegion={{
           latitude: parseFloat(Lat),
