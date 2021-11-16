@@ -36,7 +36,7 @@ export default (props) => {
     {"title": "Caixa de Multibanco", "description": "Ble Ble Ble", "type":"banco", "lat": 41.820738653037964, "long": -8.831526465299625}, 
 
     //povoa e porto
-    {"title": "Caixa de Multibanco", "description": "Ble Ble Ble", "type":"banco", "lat": 41.50177077129125, "long": -8.76384608112649}, 
+   /*{"title": "Caixa de Multibanco", "description": "Ble Ble Ble", "type":"banco", "lat": 41.50177077129125, "long": -8.76384608112649}, 
     {"title": "Caixote do Lixo", "description": "Bla bla bla", "type":"lixo", "lat": 41.385769062644975, "long": -8.764952747126735}, 
     {"title": "Caixa de Multibanco", "description": "Ble Ble Ble", "type":"banco", "lat": 41.41091860683773, "long": -8.769191781304961}, 
     {"title": "Caixa de Multibanco", "description": "Ble Ble Ble", "type":"banco", "lat": 41.39661057661955, "long": -8.72757217299842}, 
@@ -76,7 +76,7 @@ export default (props) => {
     {"title": "Caixote do Lixo", "description": "Bla bla bla", "type":"lixo", "lat": 37.00349305113664,  "long":  -7.886985980615137}, 
     {"title": "Caixa de Multibanco", "description": "Ble Ble Ble", "type":"banco", "lat": 37.08495912694741,  "long":  -7.938352527165959}, 
     {"title": "Caixote do Lixo", "description": "Bla bla bla", "type":"lixo", "lat": 37.05515162219578,  "long":  -7.839622022107235}, 
-    {"title": "Caixa de Multibanco", "description": "Ble Ble Ble", "type":"banco", "lat": 37.06925841945171,  "long":  -7.9790455056023255}, 
+    {"title": "Caixa de Multibanco", "description": "Ble Ble Ble", "type":"banco", "lat": 37.06925841945171,  "long":  -7.9790455056023255}, */
 
   ]
 

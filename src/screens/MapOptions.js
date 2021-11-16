@@ -77,10 +77,6 @@ export default (props) => {
               <Image source={require("../images/Icons/caixa-pin.png")} style={styles.icon} />
             </View>
           </TouchableOpacity>
-
-      
-
-         
         </View>
       </ScrollView>
     );
@@ -103,7 +99,8 @@ export default (props) => {
   }
 
   let changeIcon = () => {
-    props.setIcon(iconSelected);
+    console.log("Icon selecionado - ", iconSelected)
+    props.setIconSelected(iconSelected)
   }
 
   let btns = () => {
