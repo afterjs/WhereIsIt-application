@@ -50,7 +50,6 @@ export default (props) => {
 
   let returnPinBlockCode = () => {
     return (
-<<<<<<< HEAD
       <View style={styles.imgGroup}>
         <TouchableOpacity
           onPress={() => {
@@ -80,47 +79,6 @@ export default (props) => {
           </View>
         </TouchableOpacity>
       </View>
-=======
-      <ScrollView style={styles.ScrollView}>
-        <View style={styles.imgGroup}>
-          <TouchableOpacity
-            onPress={() => {
-              changeOpacityStates(false, true, true);
-              setIconSelected('lixo');
-            }}
-          >
-            <View style={[styles.form, lixoOpacity ? opacity : { opacity: 1 }]}>
-              <Text style={styles.iconText}>LIXO</Text>
-              <Image source={require("../images/Icons/lixo-pin.png")} style={styles.icon} />
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => {
-              changeOpacityStates(true, false, true);
-              setIconSelected('banco');
-            }}
-          >
-            <View style={[styles.form, bancoOpacity ? opacity : { opacity: 1 }]}>
-              <Text style={styles.iconText}>Multibanco</Text>
-              <Image source={require("../images/Icons/caixa-pin.png")} style={styles.icon} />
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => {
-              changeOpacityStates(true, true, false);
-              setIconSelected('ctt');
-            }}
-          >
-            <View style={[styles.form, cttOpacity ? opacity : { opacity: 1 }]}>
-              <Text style={styles.iconText}>CTT</Text>
-              <Image source={require("../images/Icons/caixa-pin.png")} style={styles.icon} />
-            </View>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
->>>>>>> ab01b30362cbd49fa96831b189100a7744183b0e
     );
   };
 
@@ -173,14 +131,8 @@ export default (props) => {
   };
 
   let changeIcon = () => {
-<<<<<<< HEAD
     props.setIcon(iconSelected);
   };
-=======
-    console.log("Icon selecionado - ", iconSelected)
-    props.setIconSelected(iconSelected)
-  }
->>>>>>> ab01b30362cbd49fa96831b189100a7744183b0e
 
   let changeMap = () => {
     props.changeMap(mapSelected);
