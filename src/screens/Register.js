@@ -85,12 +85,8 @@ export default (props) => {
   };
 
   const isAllValid = () => {
-    console.log("kkkk");
+  
     var valid = false;
-    console.log("Name - " + name.trim());
-    console.log("isValidEmail - " + isValidEmail);
-    console.log("isValidPassword - " + isValidPassword);
-    console.log("isChecked - " + isChecked);
 
     name.trim() !== "" && isValidEmail && isValidPassword && isChecked ? ((valid = true), setBtn(true)) : (valid = false);
     setIsLoading(true);

@@ -82,16 +82,9 @@ export default (props) => {
     })();
   };
 
-<<<<<<< HEAD
   let getPins = async (pinType) => {
     const ref = database.collection("pinsData");
     ref.onSnapshot((querySnashot) => {
-=======
-
-
-  let getPins = async () => {
-     database.collection("pinsData").onSnapshot((querySnashot) => {
->>>>>>> ab01b30362cbd49fa96831b189100a7744183b0e
       const items = [];
       querySnashot.forEach((doc) => {
 
@@ -137,7 +130,7 @@ export default (props) => {
     if (arr.length === 0) {
       pins.forEach((item) => {
         if (distanceRange(item.loc.latitude, item.loc.longitude) < range) {
-         if(item.type === icon) {
+         if(item.type === iconSelected) {
           data.push(item);
          }
          
@@ -146,7 +139,7 @@ export default (props) => {
     } else {
       arr.forEach((item) => {
         if (distanceRange(item.loc.latitude, item.loc.longitude) < range) {
-          if(item.type === icon) {
+          if(item.type === iconSelected) {
             data.push(item);
            }
         }
@@ -248,7 +241,6 @@ export default (props) => {
   }, []);
 
   let setIconType = (newIcon) => {
-<<<<<<< HEAD
     setNewIconSelected(newIcon);
     setWaitLocation(true);
     changeScreenOption(false, true);
@@ -263,32 +255,19 @@ export default (props) => {
 
    
 
-=======
-   
-    changePinMap(newIcon).then((val)=> {
-      if(val) {
-        setNewIcon(newIcon);
-      }
-    })
-    changeScreenOption(false, true);
-    // passar o parametro como array
-     // setNewIcon(newIcon);
-    // setWaitLocation(true);
-   //changeScreenOption(false, true);
-
-    //getPins(newIcon).then((val) => {
-    //  setTimeout(() => {
-    //    setIsMapLoaded(true);
-    //  setWaitLocation(false);
-    // }, 1000);
-    //});
->>>>>>> ab01b30362cbd49fa96831b189100a7744183b0e
   };
 
   let changeMapType = (map) => {
-    setMapType(map)
+    setMapType(map);
+    setWaitLocation(true);
+    changeScreenOption(false, true);
 
-    console.log("New map setted -. " , map)
+    setTimeout(() => {
+      setIsMapLoaded(true);
+      setWaitLocation(false);
+    }, 1500);
+
+  
   }
 
   if (waitLocation) {
@@ -296,11 +275,7 @@ export default (props) => {
   }
 
   if (showOptions) {
-<<<<<<< HEAD
     return <MapOptions icon={iconSelected} setIcon={setIconType} screen={changeScreenOption}  map={mapType} changeMap={changeMapType}/>;
-=======
-    return <MapOptions icon={icon} setIconSelected={setIconType} screen={changeScreenOption} />;
->>>>>>> ab01b30362cbd49fa96831b189100a7744183b0e
   }
 
   return (
