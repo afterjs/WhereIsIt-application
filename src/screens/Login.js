@@ -17,7 +17,6 @@ LogBox.ignoreLogs(['Setting a timer']);
 export default (props) => {
   const navigation = useNavigation();
   const { signIn } = React.useContext(AuthContext);
-
   const [email, setEmail] = useState("");
   const [btn, btnStatus] = useState(false);
   const [isValidEmail, setisValidEmail] = useState(true);
@@ -34,7 +33,7 @@ export default (props) => {
     navigation.replace("ResetPassword");
   };
 
-  /*useEffect(() => {
+  useEffect(() => {
    
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
@@ -48,9 +47,8 @@ export default (props) => {
     });
     return unsubscribe;
   }, []);
-*/
 
- 
+
   const validate = (text) => {
     let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
     if (reg.test(text) === false) {
@@ -82,7 +80,7 @@ export default (props) => {
             btnStatus(true);
             const user = userCreadentials.user;
 
-            if (user.emailVerified) {
+            if (!user.emailVerified) {
               setIsLoading(true);
 
               const docRef = database
@@ -92,6 +90,8 @@ export default (props) => {
                 .then(async (documentSnapshot) => {
                   const data = documentSnapshot.data();      
                   saveData('name', data.name.toString())
+                  saveData('email', data.email.toString())
+                  saveData('uid', user.uid)
                   setTimeout(() => {
                     signIn();
                   }, 1000);
@@ -108,17 +108,11 @@ export default (props) => {
           })
           .catch((error) => {
             console.log(error.message);
-            
              counter++
-             
-
               counter >= 2 
               ? setForgotPassword(true)
               : setForgotPassword(false)
-            
-             
-            
-           
+
             normalAlert("Login", "A password é invalida ou o email não existe", "Verificar");
           })
       : normalAlert("Login", "Tens de preencher todos os campos!", "Verificar");
@@ -165,7 +159,7 @@ export default (props) => {
             </View>
           </View>
 
-          <View style={styles.btnGroup}>
+          <View>
             <View>
               <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={btn}>
                 <Text style={styles.btnText}>LOGIN</Text>
