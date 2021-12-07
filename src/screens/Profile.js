@@ -1,16 +1,15 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useState, useEffect } from "react";
-import { Text, View, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, Image, TextInput } from "react-native";
 import { auth } from "../../Config/firebase";
 import { AuthContext } from "../components/context";
-import { heightPercentageToDP } from '../../Config/snippets'
+import { heightPercentageToDP } from "../../Config/snippets";
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import Loader from "../components/Loader";
 import { Alert } from "react-native";
 import { normalAlert } from "../components/Alerts";
 
 export default (props) => {
-
   const [LogoutLoader, setLogoutLoader] = useState(false);
   const [passwordReseting, setPasswordReseting] = useState(false);
   const [changeEmailUi, setChangeEmailUi] = useState(false);
@@ -19,20 +18,19 @@ export default (props) => {
   const { signOut } = React.useContext(AuthContext);
 
   const [info, setInfo] = useState({
-    "name" : null,
-    "email": null,
+    name: null,
+    email: null,
   });
 
   const confirmAlert = (title, message, buttonConfirmText, func) => {
-    
     Alert.alert(title, message, [
-        {
-            text: 'Cancelar',
-            style: 'cancel',
-        },
-        { text: buttonConfirmText, onPress: () => func() },
+      {
+        text: "Cancelar",
+        style: "cancel",
+      },
+      { text: buttonConfirmText, onPress: () => func() },
     ]);
-}
+  };
 
   const handleLogout = () => {
     auth
@@ -41,9 +39,8 @@ export default (props) => {
         setLogoutLoader(true);
         setTimeout(() => {
           setLogoutLoader(false);
-          signOut()
+          signOut();
         }, 1500);
-
       })
       .catch((error) => alert(error.message));
   };
@@ -53,20 +50,18 @@ export default (props) => {
       let nm = await AsyncStorage.getItem("name");
       let em = await AsyncStorage.getItem("email");
 
-
       if (nm !== null && em !== null) {
         setInfo({
-          "name" : nm,
-          "email": em,
-        })
+          name: nm,
+          email: em,
+        });
       }
-    } catch (error) { }
+    } catch (error) {}
   };
 
   useEffect(() => {
-    load()
+    load();
   }, []);
-
 
   if (LogoutLoader) {
     return <Loader text={"A fazer logout... 😎"} />;
@@ -76,36 +71,29 @@ export default (props) => {
     return <Loader text={"A enviar email... 😎"} />;
   }
 
-
   let changeEmail = () => {
-   // user.updateEmail(info.email+"a");
-   // user.sendEmailVerification();
-   //user logout
-  }
+    // user.updateEmail(info.email+"a");
+    // user.sendEmailVerification();
+    //user logout
+  };
 
   //    confirmAlert("Email", "Deseja alterar o Email?", "Confirmar", resetPassword)
 
-  let resetPassword = () =>{
-     
-    setPasswordReseting(true)
+  let resetPassword = () => {
+    setPasswordReseting(true);
 
-      auth
+    auth
       .sendPasswordResetEmail(info.email.toString())
       .then(function () {
-  
-
         auth
-        .signOut()
-        .then(() => {
-    
-          setTimeout(() => {
-            signOut() 
-            normalAlert("Alterar Password", "Verifica a tua caixa de email para alterar a password 😎", "Ok");
-          }, 1500);
-  
-        })
-        .catch((error) => alert(error.message));
-   
+          .signOut()
+          .then(() => {
+            setTimeout(() => {
+              signOut();
+              normalAlert("Alterar Password", "Verifica a tua caixa de email para alterar a password 😎", "Ok");
+            }, 1500);
+          })
+          .catch((error) => alert(error.message));
       })
       .catch(function (error) {
         if (error.code === "auth/user-not-found") {
@@ -113,61 +101,101 @@ export default (props) => {
           normalAlert("Alterar Password", "Não existe nenhum utilizador associado ao email 😓", "Verificar");
         }
       });
+  };
 
-
-  }
-
-  if(changeEmailUi) {
-      console.log("show email ui")
-  }
-
-
-  return (
-    <View style={styles.container}>
-
-      <View style={styles.profile}>
-        <View>
-          <Image source={require("../images/Avatars/avatar.png")} style={styles.logo} />
-        </View>
-        <Text style={styles.name}>{info.name}</Text>
+  let btnsBody = () => {
+    return (
+      <View style={styles.btnLogout}>
+        <TouchableOpacity style={[styles.button]}>
+          <Text style={styles.btnText}>Voltar</Text>
+        </TouchableOpacity>
       </View>
+    );
+  };
 
+  let getBody = () => {
+    if (!changeEmailUi) {
+      return (
+        <>
+          <View style={styles.profile}>
+            <View>
+              <Image source={require("../images/Avatars/avatar.png")} style={styles.logo} />
+            </View>
+            <Text style={styles.name}>{info.name}</Text>
+          </View>
 
-      <View style={styles.buttons}>
-        <View>
-          <TouchableOpacity style={styles.button} onPress={() => {
-            confirmAlert("Password", "Deseja alterar a password?", "Confirmar", resetPassword)
-          }}>
-            <Text style={styles.btnText}>Alterar Password</Text>
-          </TouchableOpacity>
-        </View>
+          <View style={styles.buttons}>
+            <View>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => {
+                  confirmAlert("Password", "Deseja alterar a password?", "Confirmar", resetPassword);
+                }}
+              >
+                <Text style={styles.btnText}>Alterar Password</Text>
+              </TouchableOpacity>
+            </View>
 
-        <View>
-          <TouchableOpacity style={styles.button} onPress={() =>{
-            setChangeEmailUi(true)
-          }}>
-            <Text style={styles.btnText}>Alterar Email</Text>
-          </TouchableOpacity>
-        </View>
+            <View>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => {
+                  setChangeEmailUi(true);
+                }}
+              >
+                <Text style={styles.btnText}>Alterar Email</Text>
+              </TouchableOpacity>
+            </View>
 
-        <View style={styles.btnLogout}>
-          <TouchableOpacity style={[styles.button, { backgroundColor: 'red' }]} onPress={() => { handleLogout() }}>
-            <Text style={styles.btnText}>Logout</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+            <View style={styles.btnLogout}>
+              <TouchableOpacity
+                style={[styles.button, { backgroundColor: "red" }]}
+                onPress={() => {
+                  handleLogout();
+                }}
+              >
+                <Text style={styles.btnText}>Logout</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <Text style={styles.title}>Alterar Email</Text>
 
+          <View style={styles.formInputs}>
+            <View style={styles.form}>
+              <Text style={styles.inputTitle}>Email Atual</Text>
+              <TextInput style={styles.input} />
+              <View style={styles.inputUnder} />
+              <Text style={styles.isValid}>Email Invalido</Text>
+            </View>
 
-    </View >
-  );
+            <View style={styles.form}>
+              <Text style={styles.inputTitle}>Novo Email</Text>
+              <TextInput style={styles.input} />
+              <View style={styles.inputUnder} />
+              <Text style={styles.isValid}>Email Invalido</Text>
+            </View>
+          </View>
+          {btnsBody()}
+        </>
+      );
+    }
+  };
+
+  return <View style={styles.container}>{getBody()}</View>;
 };
+
+
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
     paddingHorizontal: 30,
-
   },
   button: {
     alignItems: "center",
@@ -178,20 +206,20 @@ const styles = StyleSheet.create({
     marginTop: heightPercentageToDP("10%"),
     alignItems: "center",
     justifyContent: "center",
-    flexDirection: 'column',
+    flexDirection: "column",
   },
   logo: {
     resizeMode: "contain",
-    height: 100
+    height: 100,
   },
   name: {
     color: "#05164B",
     fontSize: RFValue(20),
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: heightPercentageToDP("2%"),
   },
   buttons: {
-    flexDirection: 'column',
+    flexDirection: "column",
     marginTop: heightPercentageToDP("10%"),
   },
   button: {
@@ -211,5 +239,38 @@ const styles = StyleSheet.create({
   },
   btnLogout: {
     marginTop: heightPercentageToDP("20%"),
-  }
+  },
+  title: {
+    fontWeight: "bold",
+    textAlign: "center",
+    marginTop: heightPercentageToDP("10%"),
+    fontSize: RFValue(25),
+    color: "#05164B",
+  },
+  formInputs: {
+    marginTop: heightPercentageToDP("10%"),
+  },
+  form: {
+    marginHorizontal: 20,
+    marginTop: heightPercentageToDP("10%"),
+  },
+  input: {
+    height: heightPercentageToDP("5%"),
+    fontSize: RFValue(15),
+  },
+  inputTitle: {
+    color: "#707070",
+    fontSize: RFValue(18),
+    fontWeight: "bold",
+  },
+  inputUnder: {
+    borderBottomColor: "#05164B",
+    borderBottomWidth: 2,
+  },
+  isValid: {
+    color: "red",
+    marginTop: heightPercentageToDP("1%"),
+    opacity: 0,
+    height: 0,
+  },
 });

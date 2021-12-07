@@ -79,8 +79,8 @@ export default (props) => {
           .then((userCreadentials) => {
             btnStatus(true);
             const user = userCreadentials.user;
-
-            if (!user.emailVerified) {
+    
+            if (user.emailVerified) {
               setIsLoading(true);
 
               const docRef = database
