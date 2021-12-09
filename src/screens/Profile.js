@@ -22,6 +22,16 @@ export default (props) => {
     email: null,
   });
 
+  const [email, setEmail] = useState({
+    email: null,
+    isValid: false,
+  });
+
+  const [newEmail, setNewEmail] = useState({
+    email: null,
+    isValid: false,
+  });
+
   const confirmAlert = (title, message, buttonConfirmText, func) => {
     Alert.alert(title, message, [
       {
@@ -56,7 +66,40 @@ export default (props) => {
           email: em,
         });
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const validate = (text, type) => {
+    let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
+    if (reg.test(text) === false) {
+      if (type === 0) {
+        setEmail({
+          email: text.trim(),
+          isValid: true,
+        });
+      } else {
+        setNewEmail({
+          email: text.trim(),
+          isValid: true,
+        });
+      }
+      return false;
+    } else {
+      if (type === 0) {
+        setEmail({
+          email: text.trim(),
+          isValid: false,
+        });
+      } else {
+        setNewEmail({
+          email: text.trim(),
+          isValid: false,
+        });
+      }
+      return true;
+    }
   };
 
   useEffect(() => {
@@ -72,12 +115,26 @@ export default (props) => {
   }
 
   let changeEmail = () => {
-    // user.updateEmail(info.email+"a");
-    // user.sendEmailVerification();
-    //user logout
+    if (email.email.trim() !== info.email.trim()) {
+      normalAlert("Atenção", "O email que introduziu não é igual ao email associado.");
+      return;
+    } else {
+      user.updateEmail(newEmail.email).then(() => {
+        user.sendEmailVerification();
+        auth
+          .signOut()
+          .then(() => {
+            setLogoutLoader(true);
+            setTimeout(() => {
+              normalAlert("Atenção", "O teu email foi alterado. Confirme o novo email para poder fazer login.");
+              signOut();
+            }, 1500);
+          })
+          .catch((error) => alert(error.message));
+      });
+    }
   };
 
-  //    confirmAlert("Email", "Deseja alterar o Email?", "Confirmar", resetPassword)
 
   let resetPassword = () => {
     setPasswordReseting(true);
@@ -104,16 +161,47 @@ export default (props) => {
   };
 
   let btnsBody = () => {
-    return (
-      <View style={styles.btnLogout}>
-        <TouchableOpacity style={[styles.button]}>
-          <Text style={styles.btnText}>Voltar</Text>
-        </TouchableOpacity>
-      </View>
-    );
+    if (email.email === null && newEmail.email === null) {
+      return (
+        <View style={styles.btnLogout}>
+          <TouchableOpacity
+            style={[styles.button]}
+            onPress={() => {
+              setChangeEmailUi(false);
+            }}
+          >
+            <Text style={styles.btnText}>Voltar</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    } else {
+      return (
+        <View style={styles.btns}>
+          <TouchableOpacity
+            style={styles.buttonBottom}
+            onPress={() => {
+              setChangeEmailUi(false);
+            }}
+          >
+            <Text style={styles.btnText}>Voltar</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.buttonBottom, email.email === null && newEmail.email === null ? {} : {backgroundColor: '#BBC6CB'}]}
+            onPress={() => {
+              changeEmail(); 
+            }}
+            disabled={email.isValid && newEmail.isValid ? false : true}
+          >
+            <Text style={styles.btnText}>Confirmar</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
   };
 
   let getBody = () => {
+
     if (!changeEmailUi) {
       return (
         <>
@@ -163,21 +251,22 @@ export default (props) => {
     } else {
       return (
         <>
+          
           <Text style={styles.title}>Alterar Email</Text>
 
           <View style={styles.formInputs}>
             <View style={styles.form}>
               <Text style={styles.inputTitle}>Email Atual</Text>
-              <TextInput style={styles.input} />
+              <TextInput style={styles.input} onChangeText={(text) => validate(text, 0)} />
               <View style={styles.inputUnder} />
-              <Text style={styles.isValid}>Email Invalido</Text>
+              <Text style={email.isValid ? styles.notValid : styles.isValid}>Email Invalido</Text>
             </View>
 
             <View style={styles.form}>
               <Text style={styles.inputTitle}>Novo Email</Text>
-              <TextInput style={styles.input} />
+              <TextInput style={styles.input} onChangeText={(text) => validate(text, 1)} />
               <View style={styles.inputUnder} />
-              <Text style={styles.isValid}>Email Invalido</Text>
+              <Text style={newEmail.isValid ? styles.notValid : styles.isValid}>Email Invalido</Text>
             </View>
           </View>
           {btnsBody()}
@@ -188,8 +277,6 @@ export default (props) => {
 
   return <View style={styles.container}>{getBody()}</View>;
 };
-
-
 
 const styles = StyleSheet.create({
   container: {
@@ -202,6 +289,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#DDDDDD",
     padding: 10,
   },
+
   profile: {
     marginTop: heightPercentageToDP("10%"),
     alignItems: "center",
@@ -232,10 +320,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     borderRadius: 10,
   },
+
+
+
   btnText: {
     color: "#fff",
     fontSize: RFValue(20),
     fontWeight: "bold",
+    textAlign: "center",
   },
   btnLogout: {
     marginTop: heightPercentageToDP("20%"),
@@ -252,7 +344,7 @@ const styles = StyleSheet.create({
   },
   form: {
     marginHorizontal: 20,
-    marginTop: heightPercentageToDP("10%"),
+    marginTop: heightPercentageToDP("5%"),
   },
   input: {
     height: heightPercentageToDP("5%"),
@@ -272,5 +364,23 @@ const styles = StyleSheet.create({
     marginTop: heightPercentageToDP("1%"),
     opacity: 0,
     height: 0,
+  },
+  notValid: {
+    color: "red",
+    marginTop: heightPercentageToDP("1%"),
+  },
+  btns: {
+    marginTop: heightPercentageToDP("5%"),
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  buttonBottom: {
+    height: 50,
+    width: "40%",
+    backgroundColor: "#05164B",
+    marginHorizontal: 10,
+    justifyContent: "center",
+    borderRadius: 10,
   },
 });

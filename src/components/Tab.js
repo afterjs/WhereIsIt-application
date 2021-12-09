@@ -31,6 +31,7 @@ export default class Tavbar extends React.Component {
         <NavigationContainer>
           <Tab.Navigator
             screenOptions={{
+              "tabBarHideOnKeyboard":"true",
               tabBarLabelStyle: {
                 fontSize: 15,
                 fontWeight: 'bold'

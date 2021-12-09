@@ -3,16 +3,14 @@ import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import React, { useState, useEffect } from "react";
 import { StyleSheet, View, ScrollView, Image, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, LogBox } from "react-native";
 import { AuthContext } from "../components/context";
-import {heightPercentageToDP } from "../../Config/snippets";
+import { heightPercentageToDP } from "../../Config/snippets";
 import { auth, database } from "../../Config/firebase";
 import { normalAlert } from "../components/Alerts";
 import Loader from "../components/Loader";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-
-LogBox.ignoreLogs(['AsyncStorage has been extracted from react-native core and will be removed in a future release.']);
-LogBox.ignoreLogs(['Setting a timer']); 
-
+LogBox.ignoreLogs(["AsyncStorage has been extracted from react-native core and will be removed in a future release."]);
+LogBox.ignoreLogs(["Setting a timer"]);
 
 export default (props) => {
   const navigation = useNavigation();
@@ -34,20 +32,23 @@ export default (props) => {
   };
 
   useEffect(() => {
-   
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
+
+        if (user.emailVerified) {
         setIsLoading(true);
         setTimeout(() => {
           setIsLoading(false);
-        //  normalAlert("Where Is It", "Bem Vindo ", "Ok");
           signIn();
         }, 1000);
       }
+    } else {
+      auth
+      .signOut()
+    }
     });
     return unsubscribe;
   }, []);
-
 
   const validate = (text) => {
     let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
@@ -62,15 +63,15 @@ export default (props) => {
     }
   };
 
-  var counter = 0
+  var counter = 0;
 
   const saveData = async (key, value) => {
     try {
-      await AsyncStorage.setItem(key, value)
+      await AsyncStorage.setItem(key, value);
     } catch (error) {
-      alert(error)
+      alert(error);
     }
-  }
+  };
 
   const handleLogin = () => {
     isValidEmail && password !== ""
@@ -79,7 +80,7 @@ export default (props) => {
           .then((userCreadentials) => {
             btnStatus(true);
             const user = userCreadentials.user;
-    
+
             if (user.emailVerified) {
               setIsLoading(true);
 
@@ -88,10 +89,10 @@ export default (props) => {
                 .doc(user.uid)
                 .get()
                 .then(async (documentSnapshot) => {
-                  const data = documentSnapshot.data();      
-                  saveData('name', data.name.toString())
-                  saveData('email', data.email.toString())
-                  saveData('uid', user.uid)
+                  const data = documentSnapshot.data();
+                  saveData("name", data.name.toString());
+                  saveData("email", data.email.toString());
+                  saveData("uid", user.uid);
                   setTimeout(() => {
                     signIn();
                   }, 1000);
@@ -108,10 +109,8 @@ export default (props) => {
           })
           .catch((error) => {
             console.log(error.message);
-             counter++
-              counter >= 2 
-              ? setForgotPassword(true)
-              : setForgotPassword(false)
+            counter++;
+            counter >= 2 ? setForgotPassword(true) : setForgotPassword(false);
 
             normalAlert("Login", "A password é invalida ou o email não existe", "Verificar");
           })
@@ -149,13 +148,12 @@ export default (props) => {
                 }}
               />
               <View style={styles.inputUnder} />
-
-              <View style={forgotPassword ? styles.ShowforgotPasswordView : styles.HideforgotPasswordView} >
-              <Text style={styles.forgotPassword}>Não sabes a password?</Text>
-              <Text style={[styles.forgotPassword, styles.create]} onPress={resetPassword}>
-                Recuperar
-              </Text>
-            </View>
+              <View style={forgotPassword ? styles.ShowforgotPasswordView : styles.HideforgotPasswordView}>
+                <Text style={styles.forgotPassword}>Não sabes a password?</Text>
+                <Text style={[styles.forgotPassword, styles.create]} onPress={resetPassword}>
+                  Recuperar
+                </Text>
+              </View>
             </View>
           </View>
 
@@ -241,7 +239,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     color: "#30A24B",
-    
   },
 
   HideforgotPasswordView: {
@@ -285,5 +282,4 @@ const styles = StyleSheet.create({
     fontSize: RFValue(15),
     textAlign: "center",
   },
-  
 });
