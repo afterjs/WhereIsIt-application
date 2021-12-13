@@ -3,7 +3,7 @@ import { View, StyleSheet, Dimensions, Image, Text, TouchableOpacity } from "rea
 import * as Location from "expo-location";
 import WaitLocation_Screen from "../components/WaitLocation";
 import { StatusBar } from "expo-status-bar";
-import { Marker } from "react-native-maps";
+import { Marker, Callout } from "react-native-maps";
 import MapView from "react-native-map-clustering";
 import tile from "../../Config/whiteMode";
 import lixo from "../images/Icons/lixo-pin.png";
@@ -12,9 +12,10 @@ import { database } from "../../Config/firebase";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getDistance } from "geolib";
 import { useIsFocused } from "@react-navigation/native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import MapOptions from "../screens/MapOptions";
+
+import * as Linking from 'expo-linking';
 
 let gpsChecker = false;
 
@@ -31,7 +32,6 @@ export default (props) => {
   const [iconSelected, setNewIconSelected] = useState("lixo");
   const [mapType, setMapType] = useState("standard");
   const [reloadMap, setRealoadMap] = useState(true);
-
 
   var top = useSafeAreaInsets().top;
 
@@ -88,8 +88,7 @@ export default (props) => {
     ref.onSnapshot((querySnashot) => {
       const items = [];
       querySnashot.forEach((doc) => {
-
-        if(pinType===null) {
+        if (pinType === null) {
           if (doc.data().type === iconSelected) {
             items.push(doc.data());
           }
@@ -98,7 +97,6 @@ export default (props) => {
             items.push(doc.data());
           }
         }
-         
       });
 
       setPins(items);
@@ -129,18 +127,17 @@ export default (props) => {
     if (arr.length === 0) {
       pins.forEach((item) => {
         if (distanceRange(item.loc.latitude, item.loc.longitude) < range) {
-         if(item.type === iconSelected) {
-          data.push(item);
-         }
-         
+          if (item.type === iconSelected) {
+            data.push(item);
+          }
         }
       });
     } else {
       arr.forEach((item) => {
         if (distanceRange(item.loc.latitude, item.loc.longitude) < range) {
-          if(item.type === iconSelected) {
+          if (item.type === iconSelected) {
             data.push(item);
-           }
+          }
         }
       });
     }
@@ -150,9 +147,8 @@ export default (props) => {
     }
   };
 
-
   let changePinMap = async (type) => {
-    console.log("type é - ", type)
+    console.log("type é - ", type);
     var data = [];
 
     var range = 30;
@@ -161,21 +157,28 @@ export default (props) => {
       range = 1000;
     }
 
-      pins.forEach((item) => {
-        if (distanceRange(item.loc.latitude, item.loc.longitude) < range) {
-         if(item.type === type) {
-           console.log("inside")
+    pins.forEach((item) => {
+      if (distanceRange(item.loc.latitude, item.loc.longitude) < range) {
+        if (item.type === type) {
+          console.log("inside");
           data.push(item);
-         }
-         
         }
-      });
-    
+      }
+    });
+
     if (data.length !== 0) {
       setPinsByLoc(data);
     }
 
-    return true
+    return true;
+  };
+
+
+
+  let chooseGPSType = (coords) => {
+    var scheme = Platform.OS === 'ios' ? 'maps:' : 'geo:';
+  var url = scheme + `${coords.latitude},${coords.latitude}`;
+  Linking.openURL(url);
   };
 
   function createMarker() {
@@ -190,6 +193,37 @@ export default (props) => {
         description={marker.description}
       >
         <Image source={imageResolve(marker.type)} style={{ height: 41, width: 28 }} />
+
+        <Callout
+          tooltip
+          onPress={() => {
+            chooseGPSType(marker.loc);
+          }}
+        >
+          <View>
+            <View style={[styles.bubble]}>
+              <Text style={styles.name}>{marker.title.toUpperCase()}</Text>
+              <Text style={styles.streetName}>Rua - {marker.streetName}</Text>
+              <Text style={styles.description}>{marker.description}</Text>
+
+              <View
+                style={{
+                  borderBottomColor: "#BBC6CB",
+                  borderBottomWidth: 1,
+                  padding: 5,
+                }}
+              />
+
+              <View style={styles.goLoc}>
+                <Text style={styles.locText}>Marcar Localização</Text>
+                <MaterialIcons name="gps-fixed" size={30} color="#05164B" />
+              </View>
+
+            </View>
+            <View style={styles.arrowBorder} />
+            <View style={styles.arrow} />
+          </View>
+        </Callout>
       </Marker>
     ));
   }
@@ -244,16 +278,12 @@ export default (props) => {
     setWaitLocation(true);
     changeScreenOption(false, true);
 
-  
     getPins(newIcon).then((val) => {
-     setTimeout(() => {
-      setIsMapLoaded(true);
-      setWaitLocation(false);
-     }, 1000);
+      setTimeout(() => {
+        setIsMapLoaded(true);
+        setWaitLocation(false);
+      }, 1000);
     });
-
-   
-
   };
 
   let changeMapType = (map) => {
@@ -270,19 +300,17 @@ export default (props) => {
       setIsMapLoaded(true);
       setWaitLocation(false);
     }, 1500);
-
-  }
+  };
 
   if (waitLocation) {
     return <WaitLocation_Screen loc={requestLoc} screen={showBtn} />;
   }
 
   if (showOptions) {
-    return <MapOptions icon={iconSelected} setIcon={setIconType} screen={changeScreenOption}  map={mapType} changeMap={changeMapType}/>;
+    return <MapOptions icon={iconSelected} setIcon={setIconType} screen={changeScreenOption} map={mapType} changeMap={changeMapType} />;
   }
 
-
-  if(reloadMap) {
+  if (reloadMap) {
     return (
       <View style={styles.container}>
         <View style={styles.item}>
@@ -294,7 +322,7 @@ export default (props) => {
             <MaterialCommunityIcons name="map-search-outline" size={30} color="red" />
           </TouchableOpacity>
         </View>
-  
+
         <MapView
           clusterColor="#05164B"
           clusterTextColor="white"
@@ -318,19 +346,18 @@ export default (props) => {
             setLat(e.latitude);
             setLong(e.longitude);
             update([]);
-  
-            var t = parseInt(Math.log2(360 * (Dimensions.get("window").width / 256 / e.longitudeDelta)));
-            setZoom(t);
+
+            var zoom = parseInt(Math.log2(360 * (Dimensions.get("window").width / 256 / e.longitudeDelta)));
+            setZoom(zoom);
           }}
         >
           {createMarker()}
         </MapView>
-  
+
         <StatusBar style="auto" />
       </View>
     );
   }
-  
 };
 
 const styles = StyleSheet.create({
@@ -357,4 +384,82 @@ const styles = StyleSheet.create({
     zIndex: 1,
     opacity: 0.5,
   },
+  bubble: {
+    flexDirection: "column",
+    alignSelf: "flex-start",
+    backgroundColor: "#fff",
+    borderRadius: 6,
+    borderColor: "#ccc",
+    borderWidth: 0.5,
+    padding: 15,
+    width: 200,
+  },
+
+  arrow: {
+    backgroundColor: "transparent",
+    borderColor: "transparent",
+    borderTopColor: "#fff",
+    borderWidth: 16,
+    alignSelf: "center",
+    marginTop: -32,
+  },
+  arrowBorder: {
+    backgroundColor: "transparent",
+    borderColor: "transparent",
+    borderTopColor: "#007a87",
+    borderWidth: 16,
+    alignSelf: "center",
+    marginTop: -0.5,
+  },
+
+  name: {
+    fontSize: 20,
+    marginBottom: 5,
+    textAlign: "center",
+    color: "#05164B",
+    fontWeight: "bold",
+  },
+  streetName: {
+    fontSize: 15,
+    fontWeight: "bold",
+  },
+  description: {
+    color: "#BBC6CB",
+    marginTop: "3%",
+    fontStyle: "italic",
+  },
+  locText: {
+    color: "#05164B",
+    fontWeight: "bold",
+    fontSize: 15,
+  },
+
+  //streetName
+  //description
+
+  gpsButton: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+  },
+  button: {
+    alignItems: "center",
+    backgroundColor: "#DDDDDD",
+    padding: 10,
+  },
+  image: {
+    width: 100,
+    height: 80,
+  },
+  calloutImage: {
+    textAlign: "center",
+    justifyContent: "center",
+    backgroundColor: "red",
+  },
+  goLoc: { 
+    flexDirection: "row", 
+    alignContent: "center", 
+    textAlign: "center", 
+    alignItems: "center", 
+    marginTop: 5, 
+    justifyContent: "space-around" },
 });

@@ -17,10 +17,7 @@ export default (props) => {
 
   const { signOut } = React.useContext(AuthContext);
 
-  const [info, setInfo] = useState({
-    name: null,
-    email: null,
-  });
+  const [name, setName] = useState('WhereIsIt');
 
   const [email, setEmail] = useState({
     email: null,
@@ -55,16 +52,11 @@ export default (props) => {
       .catch((error) => alert(error.message));
   };
 
-  const load = async (key) => {
+  const load = async () => {
     try {
-      let nm = await AsyncStorage.getItem("name");
-      let em = await AsyncStorage.getItem("email");
-
-      if (nm !== null && em !== null) {
-        setInfo({
-          name: nm,
-          email: em,
-        });
+      let name = await AsyncStorage.getItem("name");
+      if (name !== null) {
+        setName(name);
       }
     } catch (error) {
       console.log(error);
@@ -115,7 +107,7 @@ export default (props) => {
   }
 
   let changeEmail = () => {
-    if (email.email.trim() !== info.email.trim()) {
+    if (email.email.trim() !== user.email.trim()) {
       normalAlert("Atenção", "O email que introduziu não é igual ao email associado.");
       return;
     } else {
@@ -140,7 +132,7 @@ export default (props) => {
     setPasswordReseting(true);
 
     auth
-      .sendPasswordResetEmail(info.email.toString())
+      .sendPasswordResetEmail(user.email.toString())
       .then(function () {
         auth
           .signOut()
@@ -167,6 +159,18 @@ export default (props) => {
           <TouchableOpacity
             style={[styles.button]}
             onPress={() => {
+          
+            
+              setEmail({
+                email: null,
+                isValid: false,
+              })
+
+              setNewEmail({
+                email: null,
+                isValid: false,
+              })
+
               setChangeEmailUi(false);
             }}
           >
@@ -180,6 +184,17 @@ export default (props) => {
           <TouchableOpacity
             style={styles.buttonBottom}
             onPress={() => {
+
+              setEmail({
+                email: null,
+                isValid: false,
+              })
+
+              setNewEmail({
+                email: null,
+                isValid: false,
+              })
+
               setChangeEmailUi(false);
             }}
           >
@@ -187,11 +202,11 @@ export default (props) => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.buttonBottom, email.email === null && newEmail.email === null ? {} : {backgroundColor: '#BBC6CB'}]}
+            style={[styles.buttonBottom, email.email != null && newEmail.email != null && !email.isValid && !newEmail.isValid ? {} : {backgroundColor: '#BBC6CB'}]}
             onPress={() => {
               changeEmail(); 
             }}
-            disabled={email.isValid && newEmail.isValid ? false : true}
+            disabled={email.isValid && newEmail.isValid ? true : false}
           >
             <Text style={styles.btnText}>Confirmar</Text>
           </TouchableOpacity>
@@ -209,7 +224,7 @@ export default (props) => {
             <View>
               <Image source={require("../images/Avatars/avatar.png")} style={styles.logo} />
             </View>
-            <Text style={styles.name}>{info.name}</Text>
+            <Text style={styles.name}>{name}</Text>
           </View>
 
           <View style={styles.buttons}>
@@ -257,14 +272,14 @@ export default (props) => {
           <View style={styles.formInputs}>
             <View style={styles.form}>
               <Text style={styles.inputTitle}>Email Atual</Text>
-              <TextInput style={styles.input} onChangeText={(text) => validate(text, 0)} />
+              <TextInput style={styles.input} value={email.email} onChangeText={(text) => validate(text, 0)} />
               <View style={styles.inputUnder} />
               <Text style={email.isValid ? styles.notValid : styles.isValid}>Email Invalido</Text>
             </View>
 
             <View style={styles.form}>
               <Text style={styles.inputTitle}>Novo Email</Text>
-              <TextInput style={styles.input} onChangeText={(text) => validate(text, 1)} />
+              <TextInput style={styles.input} value={newEmail.email} onChangeText={(text) => validate(text, 1)} />
               <View style={styles.inputUnder} />
               <Text style={newEmail.isValid ? styles.notValid : styles.isValid}>Email Invalido</Text>
             </View>

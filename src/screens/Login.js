@@ -91,8 +91,6 @@ export default (props) => {
                 .then(async (documentSnapshot) => {
                   const data = documentSnapshot.data();
                   saveData("name", data.name.toString());
-                  saveData("email", data.email.toString());
-                  saveData("uid", user.uid);
                   setTimeout(() => {
                     signIn();
                   }, 1000);
