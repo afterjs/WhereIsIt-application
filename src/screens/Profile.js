@@ -8,6 +8,8 @@ import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import Loader from "../components/Loader";
 import { Alert } from "react-native";
 import { normalAlert } from "../components/Alerts";
+import { database } from "../../Config/firebase";
+
 
 export default (props) => {
   const [LogoutLoader, setLogoutLoader] = useState(false);
@@ -18,6 +20,7 @@ export default (props) => {
   const { signOut } = React.useContext(AuthContext);
 
   const [name, setName] = useState('WhereIsIt');
+  const [points, setPoints] = useState(0);
 
   const [email, setEmail] = useState({
     email: null,
@@ -55,8 +58,12 @@ export default (props) => {
   const load = async () => {
     try {
       let name = await AsyncStorage.getItem("name");
+      let points = await AsyncStorage.getItem("points");
       if (name !== null) {
         setName(name);
+      }
+      if (points !== null) {
+        setPoints(points);
       }
     } catch (error) {
       console.log(error);
@@ -95,6 +102,7 @@ export default (props) => {
   };
 
   useEffect(() => {
+    console.log(user.uid)
     load();
   }, []);
 
@@ -113,7 +121,10 @@ export default (props) => {
     } else {
       user.updateEmail(newEmail.email).then(() => {
         user.sendEmailVerification();
-        auth
+
+        database.collection("users").doc(user.uid).update({email: newEmail.email.toString().trim()});
+
+        auth   
           .signOut()
           .then(() => {
             setLogoutLoader(true);
@@ -224,7 +235,8 @@ export default (props) => {
             <View>
               <Image source={require("../images/Avatars/avatar.png")} style={styles.logo} />
             </View>
-            <Text style={styles.name}>{name}</Text>
+            <Text style={styles.name}>{name} | {points} pontos</Text>
+           
           </View>
 
           <View style={styles.buttons}>

@@ -18,6 +18,7 @@ import MapOptions from "../screens/MapOptions";
 import * as Linking from 'expo-linking';
 
 let gpsChecker = false;
+const checkServiceGps = require("../components/GpsStatus");
 
 export default (props) => {
   const [waitLocation, setWaitLocation] = useState(true);
@@ -45,7 +46,7 @@ export default (props) => {
   if (isFocused) {
     if (isMapLoaded) {
       gpsChecker = setInterval(async () => {
-        await checkServiceGps().then((val) => {
+         checkServiceGps().then((val) => {
           if (!val) {
             setIsMapLoaded(false);
             setShowBtn(true);
@@ -233,19 +234,7 @@ export default (props) => {
     return parseInt(distance / 1000);
   }
 
-  let checkServiceGps = async () => {
-    let { status } = await Location.getForegroundPermissionsAsync();
-    if (status === "granted") {
-      let serviceStatus = await Location.hasServicesEnabledAsync();
-      if (serviceStatus) {
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  };
+
 
   let changeScreenOption = (boolOps, boolMap) => {
     setShowOptions(boolOps);
@@ -253,6 +242,7 @@ export default (props) => {
   };
 
   useEffect(() => {
+    
     checkServiceGps().then((state) => {
       if (state) {
         getPins(null).then((val) => {

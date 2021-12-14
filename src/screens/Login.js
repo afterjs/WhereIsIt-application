@@ -65,13 +65,13 @@ export default (props) => {
 
   var counter = 0;
 
-  const saveData = async (key, value) => {
+const saveData = async (key, value) => {
     try {
       await AsyncStorage.setItem(key, value);
     } catch (error) {
       alert(error);
     }
-  };
+};
 
   const handleLogin = () => {
     isValidEmail && password !== ""
@@ -91,6 +91,7 @@ export default (props) => {
                 .then(async (documentSnapshot) => {
                   const data = documentSnapshot.data();
                   saveData("name", data.name.toString());
+                  saveData("points", data.points.toString());
                   setTimeout(() => {
                     signIn();
                   }, 1000);

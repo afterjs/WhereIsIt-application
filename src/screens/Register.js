@@ -60,6 +60,8 @@ export default (props) => {
                 email: user.email,
                 map: false,
                 permissions: 0,
+                points: 0,
+                pendingPinsCount: 0
               })
               .then(async (t) => {
                 user.sendEmailVerification();
