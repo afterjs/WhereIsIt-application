@@ -34,18 +34,16 @@ export default (props) => {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-
         if (user.emailVerified) {
-        setIsLoading(true);
-        setTimeout(() => {
-          setIsLoading(false);
-          signIn();
-        }, 1000);
+          setIsLoading(true);
+          setTimeout(() => {
+            setIsLoading(false);
+            signIn();
+          }, 1000);
+        }
+      } else {
+        auth.signOut();
       }
-    } else {
-      auth
-      .signOut()
-    }
     });
     return unsubscribe;
   }, []);
@@ -65,13 +63,13 @@ export default (props) => {
 
   var counter = 0;
 
-const saveData = async (key, value) => {
+  const saveData = async (key, value) => {
     try {
       await AsyncStorage.setItem(key, value);
     } catch (error) {
       alert(error);
     }
-};
+  };
 
   const handleLogin = () => {
     isValidEmail && password !== ""

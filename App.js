@@ -24,6 +24,6 @@ export default function App() {
   }));
    
 
-    return <AuthContext.Provider value={authContext}>{!IsAuthenticated ? <Stack /> : <Tab />}</AuthContext.Provider>;
+  return <AuthContext.Provider value={authContext}>{!IsAuthenticated ? <Stack /> : <Tab />}</AuthContext.Provider>;
 
 }
