@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Dimensions, Image, Text, TouchableOpacity } from "react-native";
+import { View, StyleSheet, Dimensions, Image, Text, TouchableOpacity, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import MapView from "react-native-map-clustering";
@@ -11,7 +11,7 @@ import WaitLocation_Screen from "../components/WaitLocation";
 import CreatePin from "./CreatePins";
 import * as Location from "expo-location";
 import { Marker } from "react-native-maps";
-import { database } from "../../Config/firebase";
+import { database, auth } from "../../Config/firebase";
 import { getDistance } from "geolib";
 import here from "../images/Icons/here.png";
 
@@ -30,6 +30,8 @@ export default (props) => {
   const [waitLocation, setWaitLocation] = useState(true);
   const [showBtn, setShowBtn] = useState(false);
   const [pinsByLoc, setPinsByLoc] = useState([]);
+  const [pendingPinsCounter, setPendingPinsCounter] = useState(0);
+  const user = auth.currentUser;
   var top = useSafeAreaInsets().top;
 
   const isFocused = useIsFocused();
@@ -160,6 +162,41 @@ export default (props) => {
     setCreatingPin(!creatingPin);
   };
 
+  let verifyPinCounter = () => {
+    database
+      .collection("users")
+      .doc(user.uid)
+      .get()
+      .then(async (documentSnapshot) => {
+        const data = documentSnapshot.data();
+
+        if (data.pendingPinsCount >= 3) {
+          Alert.alert(
+            "Aviso",
+            "Tem " + data.pendingPinsCount + " pin(s) pendente(s) de aprovação!",
+            [
+              {
+                text: "OK",
+              },
+            ],
+            { cancelable: false }
+          );
+        } else {
+          changeCreatingPinStatus();
+        }
+      });
+  };
+
+  let confirmAddPin = () => {
+    Alert.alert("Editor de Mapa", "Deseja adicionar um novo pin?", [
+      {
+        text: "Cancelar",
+        style: "cancel",
+      },
+      { text: "Sim", onPress: () => verifyPinCounter() },
+    ]);
+  };
+
   if (waitLocation) {
     return <WaitLocation_Screen loc={requestLoc} screen={showBtn} />;
   }
@@ -221,7 +258,7 @@ export default (props) => {
           draggable
           centerOffset={{ x: -18, y: -60 }}
           anchor={{ x: 0.69, y: 1 }}
-          title="My Location"
+          title="Novo Pin"
           coordinate={{
             latitude: parseFloat(MarkerLat),
             longitude: parseFloat(MarkerLong),
@@ -240,10 +277,10 @@ export default (props) => {
         <TouchableOpacity
           style={styles.submitCoord}
           onPress={() => {
-            console.log("marcar loc");
+            confirmAddPin();
           }}
         >
-          <Text style={styles.textButton}>Marcar Pin</Text>
+          <Text style={styles.textButton}>Adicionar Ponto</Text>
         </TouchableOpacity>
       </View>
 

@@ -1,14 +1,13 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useState, useEffect } from "react";
 import { Text, View, StyleSheet, TouchableOpacity, Image, TextInput } from "react-native";
-import { auth } from "../../Config/firebase";
 import { AuthContext } from "../components/context";
 import { heightPercentageToDP } from "../../Config/snippets";
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import Loader from "../components/Loader";
 import { Alert } from "react-native";
 import { normalAlert } from "../components/Alerts";
-import { database } from "../../Config/firebase";
+import { database, auth } from "../../Config/firebase";
 
 
 export default (props) => {
