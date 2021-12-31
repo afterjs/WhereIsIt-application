@@ -11,6 +11,7 @@ import { getDistance } from "geolib";
 
 export default (props) => {
   const [open, setOpen] = useState(false);
+  const [showLoader, setShowLoader] = useState(false);
   const [value, setValue] = useState(null);
   const [description, setDescription] = useState("Sem descrição...");
   const [items, setItems] = useState([
@@ -34,11 +35,15 @@ export default (props) => {
       return;
     }
 
+    setShowLoader(true);
+
     let pinsData = props.pins
 
     if (description.replace(/\s/g, "").length == 0) {
       setDescription("Sem descrição...");
     }
+
+
 
     const data = {
       description: description,
@@ -62,9 +67,14 @@ export default (props) => {
           });
 
         normalAlert("Sucesso", "Ponto criado com sucesso", "OK");
+        setShowLoader(false);
         props.setScreen(1);
       });
   };
+
+  if(showLoader) {
+    return <Loader text={"A adicionar novo ponto 🥰"}></Loader>
+  }
 
   return (
     <View style={styles.container}>
