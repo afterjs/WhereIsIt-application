@@ -13,6 +13,7 @@ import * as Location from "expo-location";
 import { Marker } from "react-native-maps";
 import { database, auth } from "../../Config/firebase";
 import { getDistance } from "geolib";
+import { normalAlert } from "../components/Alerts";
 import here from "../images/Icons/here.png";
 
 let gpsChecker = false;
@@ -20,6 +21,7 @@ const checkServiceGps = require("../components/GpsStatus");
 
 export default (props) => {
   const [creatingPin, setCreatingPin] = useState(false);
+  const [streetName, setStreetName] = useState("");
   const [Lat, setLat] = useState("41.695174467275805");
   const [Long, setLong] = useState("-8.834282105916813");
   const [MarkerLat, setMarkerLat] = useState("41.695174467275805");
@@ -158,8 +160,31 @@ export default (props) => {
     ));
   }
 
-  let changeCreatingPinStatus = () => {
-    setCreatingPin(!creatingPin);
+  let changeCreatingPinStatus = async (typeChange) => {
+    if (typeChange === 0) {
+      var latitude = parseFloat(MarkerLat);
+      var longitude = parseFloat(MarkerLong);
+
+      await Location.reverseGeocodeAsync({
+        latitude,
+        longitude,
+      }).then((res) => {
+        setStreetName(res[0].street);
+      });
+
+      for (let i = 0; i < pinsByLoc.length; i++) {
+        let distance = getDistance({ latitude: pinsByLoc[i].loc.latitude, longitude: pinsByLoc[i].loc.longitude }, { latitude: MarkerLat, longitude: MarkerLong });
+        console.log("distance: " + distance);
+        if (distance < 5) {
+          normalAlert("Atenção", `Já existe um ponto próximo ao seu local.\n Distancia : ${distance}m`, "OK");
+          return;
+        }
+      }
+
+      setCreatingPin(!creatingPin);
+    } else {
+      setCreatingPin(!creatingPin);
+    }
   };
 
   let verifyPinCounter = () => {
@@ -182,7 +207,7 @@ export default (props) => {
             { cancelable: false }
           );
         } else {
-          changeCreatingPinStatus();
+          changeCreatingPinStatus(0);
         }
       });
   };
@@ -202,7 +227,7 @@ export default (props) => {
   }
 
   if (creatingPin) {
-    return <CreatePin setScreen={changeCreatingPinStatus} lat={MarkerLat} long={MarkerLong} />;
+    return <CreatePin setScreen={changeCreatingPinStatus} lat={MarkerLat} long={MarkerLong} street={streetName} pins={pinsByLoc} />;
   }
 
   return (

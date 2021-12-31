@@ -7,40 +7,63 @@ import { normalAlert } from "../components/Alerts";
 import Loader from "../components/Loader";
 import DropDownPicker from "react-native-dropdown-picker";
 import { database, auth, firebase } from "../../Config/firebase";
+import { getDistance } from "geolib";
 
 export default (props) => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState("Sem descrição...");
   const [items, setItems] = useState([
     { label: "Contentores do Lixo", value: "lixo" },
     { label: "Caixas de Multibanco", value: "banco" },
   ]);
 
-let resolveTitle = async (value) => {
-  if(value === "lixo") {
-    return "Contentores do Lixo";
-  } else if(value === "banco") {
-    return "Caixas de Multibanco";
-  }
-}
+  let resolveTitle = async (value) => {
+    if (value === "lixo") {
+      return "Contentores do Lixo";
+    } else if (value === "banco") {
+      return "Caixas de Multibanco";
+    }
+  };
 
-  let addNewPin = () => {
+
+  let addNewPin = async () => {
 
     if (value == null) {
       normalAlert("Atenção", "Por favor selecione um tipo de ponto", "OK");
       return;
     }
 
+    let pinsData = props.pins
+
+    if (description.replace(/\s/g, "").length == 0) {
+      setDescription("Sem descrição...");
+    }
+
     const data = {
-      description:description,
+      description: description,
       loc: new firebase.firestore.GeoPoint(props.lat, props.long),
-      streetName: "aaa",
-      title:  resolveTitle(value),
+      streetName: props.street,
+      title: await resolveTitle(value),
       type: value,
+      user: auth.currentUser.uid,
+      status: "pending",
     };
 
-    database.collection("pendingPins").doc().set(data);
+    database
+      .collection("pendingPins")
+      .add(data)
+      .then((res) => {
+        database
+          .collection("users")
+          .doc(auth.currentUser.uid)
+          .update({
+            pendingPinsCount: firebase.firestore.FieldValue.increment(1),
+          });
+
+        normalAlert("Sucesso", "Ponto criado com sucesso", "OK");
+        props.setScreen(1);
+      });
   };
 
   return (
@@ -48,7 +71,7 @@ let resolveTitle = async (value) => {
       <View style={styles.item}>
         <TouchableOpacity
           onPress={() => {
-            props.setScreen();
+            props.setScreen(1);
           }}
         >
           <MaterialCommunityIcons name="step-backward" size={30} color="#05164B" />
@@ -79,7 +102,14 @@ let resolveTitle = async (value) => {
 
       <View style={styles.form}>
         <Text style={styles.inputTitle}>Breve Descrição</Text>
-        <TextInput style={styles.input} placeholder="Não obrigatorio" />
+        <TextInput
+          style={styles.input}
+          placeholder="Não obrigatorio"
+          value={description}
+          onChangeText={(text) => {
+            setDescription(text);
+          }}
+        />
         <View style={styles.inputUnder} />
       </View>
 
