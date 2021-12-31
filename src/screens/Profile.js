@@ -9,7 +9,6 @@ import { Alert } from "react-native";
 import { normalAlert } from "../components/Alerts";
 import { database, auth } from "../../Config/firebase";
 
-
 export default (props) => {
   const [LogoutLoader, setLogoutLoader] = useState(false);
   const [passwordReseting, setPasswordReseting] = useState(false);
@@ -18,7 +17,7 @@ export default (props) => {
 
   const { signOut } = React.useContext(AuthContext);
 
-  const [name, setName] = useState('WhereIsIt');
+  const [name, setName] = useState("WhereIsIt");
   const [points, setPoints] = useState(0);
 
   const [email, setEmail] = useState({
@@ -55,14 +54,16 @@ export default (props) => {
   };
 
   const load = async () => {
+    const doc = database.collection("users").doc(auth.currentUser.uid);
+
+    doc.onSnapshot((docSnapshot) => {
+      setPoints(docSnapshot.data().points);
+    });
+
     try {
       let name = await AsyncStorage.getItem("name");
-      let points = await AsyncStorage.getItem("points");
       if (name !== null) {
         setName(name);
-      }
-      if (points !== null) {
-        setPoints(points);
       }
     } catch (error) {
       console.log(error);
@@ -101,7 +102,6 @@ export default (props) => {
   };
 
   useEffect(() => {
-    console.log(user.uid)
     load();
   }, []);
 
@@ -121,9 +121,9 @@ export default (props) => {
       user.updateEmail(newEmail.email).then(() => {
         user.sendEmailVerification();
 
-        database.collection("users").doc(user.uid).update({email: newEmail.email.toString().trim()});
+        database.collection("users").doc(user.uid).update({ email: newEmail.email.toString().trim() });
 
-        auth   
+        auth
           .signOut()
           .then(() => {
             setLogoutLoader(true);
@@ -136,7 +136,6 @@ export default (props) => {
       });
     }
   };
-
 
   let resetPassword = () => {
     setPasswordReseting(true);
@@ -169,17 +168,15 @@ export default (props) => {
           <TouchableOpacity
             style={[styles.button]}
             onPress={() => {
-          
-            
               setEmail({
                 email: null,
                 isValid: false,
-              })
+              });
 
               setNewEmail({
                 email: null,
                 isValid: false,
-              })
+              });
 
               setChangeEmailUi(false);
             }}
@@ -194,16 +191,15 @@ export default (props) => {
           <TouchableOpacity
             style={styles.buttonBottom}
             onPress={() => {
-
               setEmail({
                 email: null,
                 isValid: false,
-              })
+              });
 
               setNewEmail({
                 email: null,
                 isValid: false,
-              })
+              });
 
               setChangeEmailUi(false);
             }}
@@ -212,9 +208,9 @@ export default (props) => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.buttonBottom, email.email != null && newEmail.email != null && !email.isValid && !newEmail.isValid ? {} : {backgroundColor: '#BBC6CB'}]}
+            style={[styles.buttonBottom, email.email != null && newEmail.email != null && !email.isValid && !newEmail.isValid ? {} : { backgroundColor: "#BBC6CB" }]}
             onPress={() => {
-              changeEmail(); 
+              changeEmail();
             }}
             disabled={email.isValid && newEmail.isValid ? true : false}
           >
@@ -226,7 +222,6 @@ export default (props) => {
   };
 
   let getBody = () => {
-
     if (!changeEmailUi) {
       return (
         <>
@@ -234,8 +229,9 @@ export default (props) => {
             <View>
               <Image source={require("../images/Avatars/avatar.png")} style={styles.logo} />
             </View>
-            <Text style={styles.name}>{name} | {points} pontos</Text>
-           
+            <Text style={styles.name}>
+              {name} | {points} pontos
+            </Text>
           </View>
 
           <View style={styles.buttons}>
@@ -277,7 +273,6 @@ export default (props) => {
     } else {
       return (
         <>
-          
           <Text style={styles.title}>Alterar Email</Text>
 
           <View style={styles.formInputs}>
@@ -346,8 +341,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     borderRadius: 10,
   },
-
-
 
   btnText: {
     color: "#fff",

@@ -35,11 +35,21 @@ export default (props) => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         if (user.emailVerified) {
-          setIsLoading(true);
-          setTimeout(() => {
-            setIsLoading(false);
-            signIn();
-          }, 1000);
+          const userDoc = database.collection("users").doc(user.uid).get();
+          let isAdmin = false;
+          userDoc.then((doc) => {
+            if (doc.data().permissions == 0) {
+              isAdmin = false;
+            } else if (doc.data().permissions == 1) {
+              isAdmin = true;
+            }
+
+            setIsLoading(true);
+            setTimeout(() => {
+              setIsLoading(false);
+              signIn(isAdmin);
+            }, 1000);
+          });
         }
       } else {
         auth.signOut();
@@ -81,6 +91,31 @@ export default (props) => {
 
             if (user.emailVerified) {
               setIsLoading(true);
+
+              const userDoc = database.collection("users").doc(user.uid).get();
+              let isAdmin = false;
+              userDoc.then((doc) => {
+                if (doc.data().permissions == 0) {
+                  const docRef = database
+                    .collection("users")
+                    .doc(user.uid)
+                    .get()
+                    .then(async (documentSnapshot) => {
+                      const data = documentSnapshot.data();
+                      saveData("name", data.name.toString());
+                      saveData("points", data.points.toString());
+                      setTimeout(() => {
+                        signIn(false);
+                      }, 1000);
+                    });
+                } else if (doc.data().permissions == 1) {
+                  setIsLoading(true);
+                  setTimeout(() => {
+                    setIsLoading(false);
+                    signIn(true);
+                  }, 1000);
+                }
+              });
 
               const docRef = database
                 .collection("users")
