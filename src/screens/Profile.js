@@ -221,6 +221,22 @@ export default (props) => {
     }
   };
 
+ 
+  let profile = () => {
+    console.log(props.show)
+    if (props.show == true) {
+      return (
+        <Text style={styles.name}>
+          {name} | {points} pontos
+        </Text>
+      );
+    } else {
+      return <Text style={styles.name}>{name}</Text>;
+    }
+  };
+
+
+
   let getBody = () => {
     if (!changeEmailUi) {
       return (
@@ -229,9 +245,7 @@ export default (props) => {
             <View>
               <Image source={require("../images/Avatars/avatar.png")} style={styles.logo} />
             </View>
-            <Text style={styles.name}>
-              {name} | {points} pontos
-            </Text>
+           {profile()}
           </View>
 
           <View style={styles.buttons}>

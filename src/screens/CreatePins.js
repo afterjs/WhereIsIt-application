@@ -52,6 +52,7 @@ export default (props) => {
       title: await resolveTitle(value),
       type: value,
       user: auth.currentUser.uid,
+      createdAt: Date.now(),
       status: "pending",
     };
 

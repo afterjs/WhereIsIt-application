@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { AuthContext } from "./src/components/context";
 import Stack from "./src/components/Stack";
 import Tab from "./src/components/Tab";
+import TabAdmin from "./src/components/TabAdmin";
 
 export default function App() {
   const [IsAuthenticated, setIsAuthenticated] = useState({
@@ -25,5 +26,5 @@ export default function App() {
     },
   }));
 
-  return <AuthContext.Provider value={authContext}>{!IsAuthenticated.isAuthenticated ? <Stack /> : !IsAuthenticated.isAdmin ? <Tab /> : console.log("admin")}</AuthContext.Provider>;
+  return <AuthContext.Provider value={authContext}>{!IsAuthenticated.isAuthenticated ? <Stack /> : !IsAuthenticated.isAdmin ? <Tab /> : <TabAdmin></TabAdmin>}</AuthContext.Provider>;
 }

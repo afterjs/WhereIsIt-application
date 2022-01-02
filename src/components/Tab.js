@@ -12,10 +12,6 @@ const Tab = createBottomTabNavigator();
 
 export default class Tavbar extends React.Component {
 
-    //posso trabalhar aqui dentro com 
-
-
-
    barIcon = (icon, size) => {
     return {
       tabBarIcon: ({ focused }) => (
@@ -52,7 +48,7 @@ export default class Tavbar extends React.Component {
           >
             <Tab.Screen name="Mapa" component={Main} options={this.barIcon("location-arrow", 30)} />
             <Tab.Screen name="Editor" component={MapEditor} options={this.barIcon("map-marked-alt", 30)} />
-            <Tab.Screen name="Perfil" component={Profile} options={this.barIcon("user-alt", 30)} />
+            <Tab.Screen name="Perfil" children={()=> <Profile show={true}/>} options={this.barIcon("user-alt", 30)} />
           </Tab.Navigator>
         </NavigationContainer>
       );
