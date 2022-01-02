@@ -161,9 +161,9 @@ export default (props) => {
   };
 
   const createThreeButtonAlert = (uid) =>
-    Alert.alert("Pedidos Pendentes", "Deseja analisar o seguinte pin pendente? ", [
+    Alert.alert("Pedidos Pendentes", "Ver informações do ponto de interesse? ", [
       {
-        text: "Aceitar",
+        text: "Sim",
         onPress: () => changeScren(uid),
       },
       {

@@ -8,6 +8,7 @@ import Loader from "../../components/Loader";
 
 export default (props) => {
   const [isLoading, setIsLoading] = useState(true);
+  const [updatingPin, setUpdatingPin] = useState(false);
   const [pinData, setPinData] = useState({
     createdAt: "",
     description: "",
@@ -63,27 +64,95 @@ export default (props) => {
     });
   };
 
+  let updatePinFirestore = (status) => {
+    if (status === "accepted") {
+      let newDoc = database.collection("pinsData").doc();
+
+      newDoc
+        .set({
+          description: pinData.description,
+          loc: new firebase.firestore.GeoPoint(pinData.latitude, pinData.longitude),
+          streetName: pinData.streetName,
+          title: pinData.title,
+          type: pinData.type,
+        })
+        .then(() => {
+          database.collection("pendingPins").doc(props.uid).update({
+            status: "accepted",
+          });
+
+          database
+            .collection("users")
+            .doc(pinData.user)
+            .update({
+              points: firebase.firestore.FieldValue.increment(2),
+            });
+        });
+
+      setUpdatingPin(true);
+      setTimeout(() => {
+        setUpdatingPin(false);
+        props.setScreen();
+        Alert.alert("Atenção", "Pin aceite com sucesso e pontos entregues!", [{ text: "OK" }], { cancelable: false });
+      }, 1500);
+    } else {
+      database.collection("pendingPins").doc(props.uid).update({
+        status: "rejected",
+      });
+
+      setUpdatingPin(true);
+      setTimeout(() => {
+        setUpdatingPin(false);
+        props.setScreen();
+        Alert.alert("Atenção", "Pin rejeitado com sucesso!", [{ text: "OK" }], { cancelable: false });
+      }, 1500);
+    }
+  };
+
   let acceptPin = () => {
     pinStatus().then((status) => {
       if (status === "pending") {
-        /*database.collection("pendingPins").doc(props.uid).update({
-          status: "accepted",
-        });*/
-       
+        Alert.alert("Pedidos Pendentes", "Quer aceitar o novo pedido pendente?", [
+          {
+            text: "Confirmar",
+            onPress: () => {
+              updatePinFirestore("accepted");
+            },
+          },
+          {
+            text: "Cancelar",
+            style: "cancel",
+          },
+        ]);
       }
     });
   };
 
   let rejectPin = () => {
-    if (pinStatus() == "pending") {
-      database.collection("pendingPins").doc(props.uid).update({
-        status: "rejected",
-      });
-    }
+    pinStatus().then((status) => {
+      if (status === "pending") {
+        Alert.alert("Pedidos Pendentes", "Quer aceitar o novo pedido pendente?", [
+          {
+            text: "Confirmar",
+            onPress: () => {
+              updatePinFirestore("rejected");
+            },
+          },
+          {
+            text: "Cancelar",
+            style: "cancel",
+          },
+        ]);
+      }
+    });
   };
 
   if (isLoading) {
     return <Loader text={"A carregar dados... 👀"} />;
+  }
+
+  if (updatingPin) {
+    return <Loader text={"A atualizar dados... 👀"} />;
   }
 
   return (
@@ -100,8 +169,8 @@ export default (props) => {
 
       <Text style={styles.title}>Pin Pendente</Text>
 
-      <View style={styles.form}>
-        <View>
+      <View style={styles.form}> 
+        <View>  
           <Text style={styles.inputTitle}>Tipo de pin</Text>
           <TextInput style={styles.input} value={pinData.title} />
           <View style={styles.inputUnder} />

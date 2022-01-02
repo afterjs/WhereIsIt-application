@@ -3,10 +3,11 @@ import { Text, View, StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
-import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 
 import Profile from "../screens/Profile";
 import PendingPins from "../screens/admin/PendingPins";
+import UpdatePin from "../screens/admin/UpdatePin";
 
 const Tab = createBottomTabNavigator();
 
@@ -51,6 +52,18 @@ export default class Tavbar extends React.Component {
             options={{
               tabBarIcon: ({ focused }) => (
                 <View>
+                  <MaterialCommunityIcons name="map-clock" size={30} color={focused ? "#05164B" : "gray"}></MaterialCommunityIcons>
+                </View>
+              ),
+            }}
+          />
+
+          <Tab.Screen
+            name="Perfil"
+            component={UpdatePin}
+            options={{
+              tabBarIcon: ({ focused }) => (
+                <View>
                   <MaterialIcons name="maps-ugc" size={30} color={focused ? "#05164B" : "gray"}></MaterialIcons>
                 </View>
               ),
@@ -72,6 +85,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   tab: {
-    position: "absolute"
+    position: "absolute",
   },
 });
