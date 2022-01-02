@@ -4,22 +4,38 @@ import { heightPercentageToDP } from "../../../Config/snippets";
 import { RFValue } from "react-native-responsive-fontsize";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { database, firebase } from "../../../Config/firebase";
+import DropDownPicker from "react-native-dropdown-picker";
 import Loader from "../../components/Loader";
 
 export default (props) => {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(null);
+  const [items, setItems] = useState([
+    { label: "Contentores do Lixo", value: "lixo" },
+    { label: "Caixas de Multibanco", value: "banco" },
+  ]);
+
   const [isLoading, setIsLoading] = useState(true);
   const [updatingPin, setUpdatingPin] = useState(false);
-  const [pinData, setPinData] = useState({
-    createdAt: "",
-    description: "",
-    latitude: "",
-    longitude: "",
-    status: "",
-    streetName: "",
-    title: "",
-    type: "",
-    user: "",
-  });
+
+const [title, setTitle] = useState("");
+const [description, setDescription] = useState("");
+const [streetName, setStreetName] = useState("");
+const [latitude, setLatitude] = useState("");
+const [longitude, setLongitude] = useState("");
+const [type, setType] = useState("");
+const [createdAt, setCreatedAt] = useState("");
+const [user, setUser] = useState("");
+
+
+
+let resolveTitle = async (value) => {
+    if (value === "lixo") {
+      return "Contentores do Lixo";
+    } else if (value === "banco") {
+      return "Caixas de Multibanco";
+    }
+  };
 
   //function to convert timestamp to date
   function timeConverter(UNIX_timestamp) {
@@ -39,17 +55,16 @@ export default (props) => {
     const pinDoc = database.collection("pendingPins").doc(props.uid).get();
 
     pinDoc.then((doc) => {
-      setPinData({
-        createdAt: timeConverter(doc.data().createdAt),
-        description: doc.data().description,
-        latitude: doc.data().loc.latitude,
-        longitude: doc.data().loc.longitude,
-        status: doc.data().status,
-        streetName: doc.data().streetName,
-        title: doc.data().title,
-        type: doc.data().type,
-        user: doc.data().user,
-      });
+     
+      setCreatedAt(timeConverter(doc.data().createdAt));
+      setUser(doc.data().user);
+      setTitle(doc.data().title);
+      setDescription(doc.data().description);
+      setStreetName(doc.data().streetName);
+      setLatitude(doc.data().loc.latitude);
+      setLongitude(doc.data().loc.longitude);
+      setValue(doc.data().type);
+
 
       setTimeout(() => {
         setIsLoading(false);
@@ -64,17 +79,17 @@ export default (props) => {
     });
   };
 
-  let updatePinFirestore = (status) => {
+  let updatePinFirestore = async (status) => {
     if (status === "accepted") {
       let newDoc = database.collection("pinsData").doc();
 
       newDoc
         .set({
-          description: pinData.description,
-          loc: new firebase.firestore.GeoPoint(pinData.latitude, pinData.longitude),
-          streetName: pinData.streetName,
-          title: pinData.title,
-          type: pinData.type,
+          description: description,
+          loc: new firebase.firestore.GeoPoint(latitude, longitude),
+          streetName: streetName,
+          title: await resolveTitle(value),
+          type: value,
         })
         .then(() => {
           database.collection("pendingPins").doc(props.uid).update({
@@ -83,7 +98,7 @@ export default (props) => {
 
           database
             .collection("users")
-            .doc(pinData.user)
+            .doc(user)
             .update({
               points: firebase.firestore.FieldValue.increment(2),
             });
@@ -170,35 +185,54 @@ export default (props) => {
       <Text style={styles.title}>Pin Pendente</Text>
 
       <View style={styles.form}> 
-        <View>  
-          <Text style={styles.inputTitle}>Tipo de pin</Text>
-          <TextInput style={styles.input} value={pinData.title} />
-          <View style={styles.inputUnder} />
+      <View style={styles.spacebtw}>
+          <Text style={styles.text}>Escolhe o ponto</Text>
+          <DropDownPicker
+            style={styles.dropDown}
+            open={open}
+            value={value}
+            items={items}
+            setOpen={setOpen}
+            setValue={setValue}
+            setItems={setItems}
+            translation={{
+              PLACEHOLDER: "Escolhe um tipo",
+            }}
+            placeholderStyle={{
+              color: "#05164B",
+              fontWeight: "bold",
+            }}
+          />
         </View>
         <View style={styles.spacebtw}>
           <Text style={styles.inputTitle}>Descrição</Text>
-          <TextInput style={styles.input} value={pinData.description} />
+          <TextInput style={styles.input} value={description} onChangeText={(text) => {
+            setDescription(text);
+          }}/>
           <View style={styles.inputUnder} />
         </View>
         <View style={styles.spacebtw}>
           <Text style={styles.inputTitle}>Nome da Rua</Text>
-          <TextInput style={styles.input} value={pinData.streetName} />
+          <TextInput style={styles.input} value={streetName} onChangeText={(text)=>{
+            setStreetName(text);
+
+          }}/>
           <View style={styles.inputUnder} />
         </View>
 
         <View style={[styles.divCoords, styles.spacebtw]}>
           <Text style={styles.inputTitle}>Latitude: </Text>
-          <Text style={styles.coords}>{pinData.latitude}</Text>
+          <Text style={styles.coords}>{latitude}</Text>
         </View>
 
         <View style={[styles.divCoords, styles.spacebtw]}>
           <Text style={styles.inputTitle}>Longitude: </Text>
-          <Text style={styles.coords}>{pinData.longitude}</Text>
+          <Text style={styles.coords}>{longitude}</Text>
         </View>
 
         <View style={styles.spacebtw}>
           <Text style={styles.inputTitle}>Data do pedido</Text>
-          <TextInput style={styles.input} value={pinData.createdAt} />
+          <TextInput style={styles.input} value={createdAt} editable={false}/>
           <View style={styles.inputUnder} />
         </View>
       </View>

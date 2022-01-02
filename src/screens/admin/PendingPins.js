@@ -172,15 +172,7 @@ export default (props) => {
       },
     ]);
 
-  let imageResolve = (img) => {
-    if (img.trim() === "lixo") {
-      return lixo;
-    } else if (img.trim() === "banco") {
-      return banco;
-    } else if (img.trim() === "ctt") {
-      return banco;
-    }
-  };
+
 
   function createMarker() {
     return pinsByLoc.map((marker, index) => (
@@ -192,8 +184,7 @@ export default (props) => {
         }}
         title={marker.title}
       >
-        <Image source={imageResolve(marker.type)} style={{ height: 41, width: 28 }} />
-
+      
         <Callout
           tooltip
           onPress={() => {

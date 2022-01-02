@@ -7,7 +7,7 @@ import { FontAwesome5, MaterialIcons, MaterialCommunityIcons } from "@expo/vecto
 
 import Profile from "../screens/Profile";
 import PendingPins from "../screens/admin/PendingPins";
-import UpdatePin from "../screens/admin/UpdatePin";
+import UpdatePin from "../screens/admin/UpdatePins";
 
 const Tab = createBottomTabNavigator();
 
@@ -59,12 +59,12 @@ export default class Tavbar extends React.Component {
           />
 
           <Tab.Screen
-            name="Perfil"
+            name="Pins"
             component={UpdatePin}
             options={{
               tabBarIcon: ({ focused }) => (
                 <View>
-                  <MaterialIcons name="maps-ugc" size={30} color={focused ? "#05164B" : "gray"}></MaterialIcons>
+                  <MaterialCommunityIcons name="map" size={30} color={focused ? "#05164B" : "gray"}></MaterialCommunityIcons>
                 </View>
               ),
             }}
