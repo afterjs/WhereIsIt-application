@@ -18,18 +18,16 @@ export default (props) => {
   const [isLoading, setIsLoading] = useState(true);
   const [updatingPin, setUpdatingPin] = useState(false);
 
-const [title, setTitle] = useState("");
-const [description, setDescription] = useState("");
-const [streetName, setStreetName] = useState("");
-const [latitude, setLatitude] = useState("");
-const [longitude, setLongitude] = useState("");
-const [type, setType] = useState("");
-const [createdAt, setCreatedAt] = useState("");
-const [user, setUser] = useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [streetName, setStreetName] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
+  const [type, setType] = useState("");
+  const [createdAt, setCreatedAt] = useState("");
+  const [user, setUser] = useState("");
 
-
-
-let resolveTitle = async (value) => {
+  let resolveTitle = async (value) => {
     if (value === "lixo") {
       return "Contentores do Lixo";
     } else if (value === "banco") {
@@ -55,7 +53,6 @@ let resolveTitle = async (value) => {
     const pinDoc = database.collection("pendingPins").doc(props.uid).get();
 
     pinDoc.then((doc) => {
-     
       setCreatedAt(timeConverter(doc.data().createdAt));
       setUser(doc.data().user);
       setTitle(doc.data().title);
@@ -64,7 +61,6 @@ let resolveTitle = async (value) => {
       setLatitude(doc.data().loc.latitude);
       setLongitude(doc.data().loc.longitude);
       setValue(doc.data().type);
-
 
       setTimeout(() => {
         setIsLoading(false);
@@ -101,6 +97,13 @@ let resolveTitle = async (value) => {
             .doc(user)
             .update({
               points: firebase.firestore.FieldValue.increment(2),
+            });
+
+          database
+            .collection("users")
+            .doc(user)
+            .update({
+              pendingPinsCount: firebase.firestore.FieldValue.increment(-1),
             });
         });
 
@@ -184,8 +187,8 @@ let resolveTitle = async (value) => {
 
       <Text style={styles.title}>Pin Pendente</Text>
 
-      <View style={styles.form}> 
-      <View style={styles.spacebtw}>
+      <View style={styles.form}>
+        <View style={styles.spacebtw}>
           <Text style={styles.text}>Escolhe o ponto</Text>
           <DropDownPicker
             style={styles.dropDown}
@@ -206,17 +209,24 @@ let resolveTitle = async (value) => {
         </View>
         <View style={styles.spacebtw}>
           <Text style={styles.inputTitle}>Descrição</Text>
-          <TextInput style={styles.input} value={description} onChangeText={(text) => {
-            setDescription(text);
-          }}/>
+          <TextInput
+            style={styles.input}
+            value={description}
+            onChangeText={(text) => {
+              setDescription(text);
+            }}
+          />
           <View style={styles.inputUnder} />
         </View>
         <View style={styles.spacebtw}>
           <Text style={styles.inputTitle}>Nome da Rua</Text>
-          <TextInput style={styles.input} value={streetName} onChangeText={(text)=>{
-            setStreetName(text);
-
-          }}/>
+          <TextInput
+            style={styles.input}
+            value={streetName}
+            onChangeText={(text) => {
+              setStreetName(text);
+            }}
+          />
           <View style={styles.inputUnder} />
         </View>
 
@@ -232,7 +242,7 @@ let resolveTitle = async (value) => {
 
         <View style={styles.spacebtw}>
           <Text style={styles.inputTitle}>Data do pedido</Text>
-          <TextInput style={styles.input} value={createdAt} editable={false}/>
+          <TextInput style={styles.input} value={createdAt} editable={false} />
           <View style={styles.inputUnder} />
         </View>
       </View>
