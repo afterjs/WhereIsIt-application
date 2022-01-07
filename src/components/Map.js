@@ -26,7 +26,7 @@ export default (props) => {
     const ref = database.collection("pinsData");
 
     ref.onSnapshot((querySnashot) => {
-      console.log("snap shot");
+   
       const items = [];
       querySnashot.forEach((doc) => {
         items.push(doc.data());
@@ -55,14 +55,14 @@ export default (props) => {
     }
 
     if (arr.length === 0) {
-      console.log("dentro do pin");
+     
       pins.forEach((item) => {
         if (distanceRange(item.loc.latitude, item.loc.longitude) < range) {
           data.push(item);
         }
       });
     } else {
-      console.log("dentro do arr");
+    
       arr.forEach((item) => {
         if (distanceRange(item.loc.latitude, item.loc.longitude) < range) {
           data.push(item);

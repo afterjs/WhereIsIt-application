@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, ScrollView, Image, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, LogBox } from "react-native";
+import { StyleSheet, View, ScrollView, Image, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, LogBox, Alert } from "react-native";
 import { AuthContext } from "../components/context";
 import { heightPercentageToDP } from "../../Config/snippets";
 import { auth, database } from "../../Config/firebase";
@@ -31,24 +31,58 @@ export default (props) => {
     navigation.replace("ResetPassword");
   };
 
+  let login = (isAdmin) => {
+    setIsLoading(true);
+    setTimeout(() => {
+      signIn(isAdmin);
+    }, 1000);
+  };
+
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         if (user.emailVerified) {
           const userDoc = database.collection("users").doc(user.uid).get();
-          let isAdmin = false;
-          userDoc.then((doc) => {
-            if (doc.data().permissions == 0) {
-              isAdmin = false;
-            } else if (doc.data().permissions == 1) {
-              isAdmin = true;
+          let isAdmin = 0;
+          return userDoc.then((doc) => {
+            if (doc.data().canLogin) {
+              if (doc.data().permissions === 0) {
+                isAdmin = 0;
+                login(isAdmin);
+              } else if (doc.data().permissions === 1) {
+                isAdmin = 1;
+                login(isAdmin);
+              } else if (doc.data().permissions === 2) {
+                isAdmin = 2;
+                login(isAdmin);
+              } else {
+                auth.signOut();
+                btnStatus(false);
+                setIsLoading(true);
+                setTimeout(() => {
+                  setIsLoading(false);
+                  Alert.alert("Login", "Erro durante a autenticação.\nTente mais tarde.", [
+                    {
+                      text: "OK",
+                    },
+                  ]);
+                  return;
+                }, 1000);
+              }
+            } else {
+              Alert.alert("Login", "A tua conta foi eliminada.\nContacta o suporte.", [
+                {
+                  text: "OK",
+                },
+              ]);
+              auth.signOut();
+              btnStatus(false);
+              setIsLoading(true);
+              setTimeout(() => {
+                setIsLoading(false);
+                return;
+              }, 1000);
             }
-
-            setIsLoading(true);
-            setTimeout(() => {
-              setIsLoading(false);
-              signIn(isAdmin);
-            }, 1000);
           });
         }
       } else {
@@ -82,58 +116,77 @@ export default (props) => {
   };
 
   const handleLogin = () => {
-    isValidEmail && password !== ""
-      ? auth
-          .signInWithEmailAndPassword(email, password)
-          .then((userCreadentials) => {
-            btnStatus(true);
-            const user = userCreadentials.user;
+    if (isValidEmail && password !== "") {
+      return auth
+        .signInWithEmailAndPassword(email, password)
+        .then((userCreadentials) => {
+          btnStatus(true);
+          const user = userCreadentials.user;
 
-            if (user.emailVerified) {
-              setIsLoading(true);
+          if (user.emailVerified) {
+            setIsLoading(true);
 
-              const userDoc = database.collection("users").doc(user.uid).get();
-              let isAdmin = false;
-              userDoc.then((doc) => {
-                if (doc.data().permissions == 0) {
-                  const docRef = database
-                    .collection("users")
-                    .doc(user.uid)
-                    .get()
-                    .then(async (documentSnapshot) => {
-                      const data = documentSnapshot.data();
-                      saveData("name", data.name.toString());
-                      saveData("points", data.points.toString());
-                      setTimeout(() => {
-                        signIn(false);
-                      }, 1000);
-                    });
+            const userDoc = database.collection("users").doc(user.uid).get();
+
+            return userDoc.then((doc) => {
+              const data = doc.data();
+
+              if (data.canLogin) {
+                if (data.permissions == 0) {
+                  saveData("name", data.name.toString());
+                  saveData("points", data.points.toString());
+                  setTimeout(() => {
+                    signIn(0);
+                  }, 1000);
                 } else if (doc.data().permissions == 1) {
+                  saveData("name", data.name.toString());
+                  saveData("points", data.points.toString());
                   setIsLoading(true);
                   setTimeout(() => {
                     setIsLoading(false);
-                    signIn(true);
+                    signIn(1);
+                  }, 1000);
+                } else if (doc.data().permissions == 2) {
+                  saveData("name", data.name.toString());
+                  saveData("points", data.points.toString());
+                  setIsLoading(true);
+                  setTimeout(() => {
+                    setIsLoading(false);
+                    signIn(2);
+                  }, 1000);
+                } else {
+                  auth.signOut();
+                  btnStatus(false);
+                  setTimeout(() => {
+                    setIsLoading(false);
+                    return;
                   }, 1000);
                 }
-              });
-            } else {
-              auth
-                .signOut()
-                .then(() => {
-                  navigation.replace("Login");
-                })
-                .catch((error) => alert(error.message));
-              normalAlert("Login", "Tens de verificar o email 😪", "Ok");
-            }
-          })
-          .catch((error) => {
-            console.log(error.message);
-            counter++;
-            counter >= 2 ? setForgotPassword(true) : setForgotPassword(false);
+              } else {
+                auth.signOut();
+                btnStatus(false);
+                return;
+              }
+            });
+          } else {
+            auth
+              .signOut()
+              .then(() => {
+                navigation.replace("Login");
+              })
+              .catch((error) => alert(error.message));
+            normalAlert("Login", "Tens de verificar o email 😪", "Ok");
+          }
+        })
+        .catch((error) => {
+          counter++;
+          counter >= 2 ? setForgotPassword(true) : setForgotPassword(false);
 
-            normalAlert("Login", "A password é invalida ou o email não existe", "Verificar");
-          })
-      : normalAlert("Login", "Tens de preencher todos os campos!", "Verificar");
+          normalAlert("Login", "A password é invalida ou o email não existe", "Verificar");
+        });
+    } else {
+      normalAlert("Login", "Tens de preencher todos os campos!", "Verificar");
+    }
   };
 
   if (isLoading) {

@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import MapView from "react-native-map-clustering";
 import tile from "../../Config/whiteMode";
-import { heightPercentageToDP } from "../../Config/snippets";
+import { heightPercentageToDP, widthPercentageToDP } from "../../Config/snippets";
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import { useIsFocused } from "@react-navigation/native";
 import WaitLocation_Screen from "../components/WaitLocation";
@@ -20,7 +20,7 @@ let gpsChecker = false;
 const checkServiceGps = require("../components/GpsStatus");
 
 export default (props) => {
-  const [creatingPin, setCreatingPin] = useState(false);
+  const [creatingPin, setCreatingPin] = useState(true);
   const [streetName, setStreetName] = useState("");
   const [Lat, setLat] = useState("41.695174467275805");
   const [Long, setLong] = useState("-8.834282105916813");
@@ -52,21 +52,25 @@ export default (props) => {
             setWaitLocation(true);
           }
         });
-      }, 2000);
+      }, 1000);
     }
   }
 
   let getPins = async () => {
     const ref = database.collection("pinsData");
     ref.onSnapshot((querySnashot) => {
-      const items = [];
-      querySnashot.forEach((doc) => {
-        items.push(doc.data());
-      });
-      setPins(items);
-      update(items);
+      if (auth.currentUser) {
+        const items = [];
+        querySnashot.forEach((doc) => {
+          items.push(doc.data());
+        });
+        setPins(items);
+        update(items);
 
-      return true;
+        return true;
+      } else {
+        return false;
+      }
     });
   };
 
@@ -169,19 +173,21 @@ export default (props) => {
         latitude,
         longitude,
       }).then((res) => {
-        setStreetName(res[0].street);
-      });
+        let street = res[0].street || "Estrada sem nome";
+        setStreetName(street);
+        console.log(res[0]);
+        console.log(street)
+        for (let i = 0; i < pinsByLoc.length; i++) {
+          let distance = getDistance({ latitude: pinsByLoc[i].loc.latitude, longitude: pinsByLoc[i].loc.longitude }, { latitude: MarkerLat, longitude: MarkerLong });
 
-      for (let i = 0; i < pinsByLoc.length; i++) {
-        let distance = getDistance({ latitude: pinsByLoc[i].loc.latitude, longitude: pinsByLoc[i].loc.longitude }, { latitude: MarkerLat, longitude: MarkerLong });
-        console.log("distance: " + distance);
-        if (distance < 5) {
-          normalAlert("Atenção", `Já existe um ponto próximo ao seu local.\n Distancia : ${distance}m`, "OK");
-          return;
+          if (distance < 5) {
+            normalAlert("Atenção", `Já existe um ponto próximo ao seu local.\n Distancia : ${distance}m`, "OK");
+            return;
+          }
         }
-      }
 
-      setCreatingPin(!creatingPin);
+        setCreatingPin(!creatingPin);
+      });
     } else {
       setCreatingPin(!creatingPin);
     }
@@ -289,7 +295,6 @@ export default (props) => {
             longitude: parseFloat(MarkerLong),
           }}
           onDragEnd={(e) => {
-            console.log(e.nativeEvent.coordinate);
             setMarkerLat(e.nativeEvent.coordinate.latitude);
             setMarkerLong(e.nativeEvent.coordinate.longitude);
           }}
@@ -360,7 +365,7 @@ const styles = StyleSheet.create({
     zIndex: 5,
     justifyContent: "center",
     position: "absolute",
-    top: 40,
+    top: heightPercentageToDP("5%"),
     left: 30,
     backgroundColor: "white",
     opacity: 0.9,
@@ -368,7 +373,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   coords: {
-    fontSize: RFValue(20),
+    fontSize: RFValue(15),
     fontWeight: "bold",
     color: "#05164B",
   },

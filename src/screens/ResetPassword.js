@@ -38,7 +38,7 @@ export default (props) => {
       })
       .catch(function (error) {
         if (error.code === "auth/user-not-found") {
-          console.log("no user found");
+
           normalAlert("Recuparar Password", "Não existe nenhum utilizador associado ao email 😓", "Verificar");
         }
       });

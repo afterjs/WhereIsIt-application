@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput } from "react-native";
-import { heightPercentageToDP } from "../../../Config/snippets";
+import { heightPercentageToDP, widthPercentageToDP } from "../../../Config/snippets";
 import { RFValue } from "react-native-responsive-fontsize";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { database, firebase } from "../../../Config/firebase";
@@ -13,23 +13,27 @@ export default (props) => {
   const [items, setItems] = useState([
     { label: "Contentores do Lixo", value: "lixo" },
     { label: "Caixas de Multibanco", value: "banco" },
+    { label: "CTT", value: "ctt" },
+    { label: "Interesses", value: "interesse" },
   ]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [updatingPin, setUpdatingPin] = useState(false);
 
-  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [streetName, setStreetName] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
-  const [type, setType] = useState("");
 
   let resolveTitle = async (value) => {
     if (value === "lixo") {
       return "Contentores do Lixo";
     } else if (value === "banco") {
       return "Caixas de Multibanco";
+    } else if (value === "ctt") {
+      return "CTT";
+    } else if (value === "interesse") {
+      return "Interesses";
     }
   };
 
@@ -37,7 +41,6 @@ export default (props) => {
     const pinDoc = database.collection("pinsData").doc(props.uid).get();
 
     pinDoc.then((doc) => {
-      setTitle(doc.data().title);
       setDescription(doc.data().description);
       setStreetName(doc.data().streetName);
       setLatitude(doc.data().loc.latitude);
@@ -194,11 +197,11 @@ const styles = StyleSheet.create({
   item: {
     justifyContent: "center",
     alignItems: "center",
-    height: 40,
-    width: 40,
+    height: heightPercentageToDP("5%"),
+    width: widthPercentageToDP("10%"),
     backgroundColor: "white",
     position: "absolute",
-    top: 40,
+    top: heightPercentageToDP("5%"),
     left: 30,
     zIndex: 1,
   },
@@ -207,7 +210,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: "bold",
     color: "#05164B",
-    top: 43,
+    top: heightPercentageToDP("5%"),
   },
 
   text: {
@@ -218,7 +221,7 @@ const styles = StyleSheet.create({
 
   form: {
     paddingHorizontal: "10%",
-    top: heightPercentageToDP("10%"),
+    top: heightPercentageToDP("2%"),
   },
   input: {
     height: heightPercentageToDP("5%"),
@@ -252,7 +255,7 @@ const styles = StyleSheet.create({
     color: "#646369",
   },
   buttons: {
-    marginTop: heightPercentageToDP("25%"),
+    marginTop: heightPercentageToDP("10%"),
     justifyContent: "center",
     alignItems: "center",
   },

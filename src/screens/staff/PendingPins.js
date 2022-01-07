@@ -10,9 +10,8 @@ import * as Location from "expo-location";
 import { Marker, Callout } from "react-native-maps";
 import { database, auth } from "../../../Config/firebase";
 import { getDistance } from "geolib";
-import Delete from "./Delete";
-import UpdatePin from "./UpdatePinData";
 
+import AnalyzePin from "../../screens/staff/AnalyzePin";
 
 let gpsChecker = false;
 const checkServiceGps = require("../../components/GpsStatus");
@@ -29,11 +28,6 @@ export default (props) => {
   const [showBtn, setShowBtn] = useState(false);
   const [pinsByLoc, setPinsByLoc] = useState([]);
   const user = auth.currentUser;
-
-  //
-  const [showDeleteScreen, setShowDeleteScreen] = useState(false);
-  const [showUpdateScreen, setShowUpdateScreen] = useState(false);
-
   var top = useSafeAreaInsets().top;
 
   const isFocused = useIsFocused();
@@ -57,20 +51,35 @@ export default (props) => {
   }
 
   let getPins = async () => {
-    const ref = database.collection("pinsData");
-    ref.onSnapshot((querySnashot) => {
-      const items = [];
-      querySnashot.forEach((doc) => {
-        const result = {
-          ...doc.data(),
-          id: doc.id,
-        };
+    const ref = database.collection("pendingPins");
+    ref.where("status", "==", "pending").onSnapshot((querySnashot) => {
+      if (auth.currentUser) {
+        const items = [];
 
-        items.push(result);
-      });
-      update(items);
+        let docsLength = querySnashot.docs.length;
 
-      return true;
+        querySnashot.forEach((doc) => {
+          const result = {
+            ...doc.data(),
+            id: doc.id,
+          };
+
+          items.push(result);
+        });
+
+        if (items.length === 0) {
+          setPinsByLoc([]);
+          setPins([]);
+          update(["clean"]);
+        } else {
+          setPins(items);
+          update(items);
+        }
+
+        return true;
+      } else {
+        return false;
+      }
     });
   };
 
@@ -98,13 +107,17 @@ export default (props) => {
         } catch (error) {}
       });
     } else {
-      arr.forEach((item) => {
-        try {
-          if (distanceRange(item.loc.latitude, item.loc.longitude, 0) < range) {
-            data.push(item);
-          }
-        } catch (error) {}
-      });
+      if (arr[0] != "clean") {
+        arr.forEach((item) => {
+          try {
+            if (distanceRange(item.loc.latitude, item.loc.longitude, 0) < range) {
+              data.push(item);
+            }
+          } catch (error) {}
+        });
+      } else {
+        setPinsByLoc([]);
+      }
     }
 
     if (data.length !== 0) {
@@ -154,31 +167,23 @@ export default (props) => {
     });
   }, []);
 
-  let deletePoint = (uid) => {
-    setUid(uid);
-    setShowDeleteScreen(true);
+  let screen = () => {
+    setShowScreen(!showScreen);
   };
 
-
-  let updatePoint = (uid) => {
+  let changeScren = (uid) => {
     setUid(uid);
-    setShowUpdateScreen(true);
+    screen();
   };
-
 
   const createThreeButtonAlert = (uid) =>
-    Alert.alert("Pontos de Interesse", "Escolha uma ação", [
+    Alert.alert("Pedidos Pendentes", "Ver informações do ponto de interesse? ", [
       {
-        text: "Editar Dados",
-        onPress: () => updatePoint(uid),
+        text: "Sim",
+        onPress: () => changeScren(uid),
       },
       {
-        text: "Eliminar Ponto",
-        onPress: () => deletePoint(uid),
-      },
-
-      {
-        text: "Fechar",
+        text: "Cancelar",
         style: "cancel",
       },
     ]);
@@ -214,7 +219,7 @@ export default (props) => {
               />
 
               <View style={styles.pressEdit}>
-                <Text style={styles.locText}>Clicar para ver opções</Text>
+                <Text style={styles.locText}>Clicar para editar</Text>
               </View>
             </View>
             <View style={styles.arrowBorder} />
@@ -225,12 +230,8 @@ export default (props) => {
     ));
   }
 
-  if (showDeleteScreen) {
-    return <Delete uid={uid} setShowDeleteScreen={setShowDeleteScreen} />;
-  }
-
-  if(showUpdateScreen){
-    return <UpdatePin uid={uid} setShowUpdateScreen={setShowUpdateScreen} />;
+  if (showScreen) {
+    return <AnalyzePin uid={uid} setScreen={screen}></AnalyzePin>;
   }
 
   if (waitLocation) {

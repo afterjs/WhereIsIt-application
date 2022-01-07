@@ -46,7 +46,6 @@ export default (props) => {
       .then(() => {
         setLogoutLoader(true);
         setTimeout(() => {
-          setLogoutLoader(false);
           signOut();
         }, 1500);
       })
@@ -57,7 +56,11 @@ export default (props) => {
     const doc = database.collection("users").doc(auth.currentUser.uid);
 
     doc.onSnapshot((docSnapshot) => {
-      setPoints(docSnapshot.data().points);
+      if (auth.currentUser) {
+        setPoints(docSnapshot.data().points);
+      } else {
+        return false;
+      }
     });
 
     try {
@@ -66,7 +69,6 @@ export default (props) => {
         setName(name);
       }
     } catch (error) {
-      console.log(error);
     }
   };
 
@@ -121,18 +123,22 @@ export default (props) => {
       user.updateEmail(newEmail.email).then(() => {
         user.sendEmailVerification();
 
-        database.collection("users").doc(user.uid).update({ email: newEmail.email.toString().trim() });
-
-        auth
-          .signOut()
-          .then(() => {
-            setLogoutLoader(true);
-            setTimeout(() => {
-              normalAlert("Atenção", "O teu email foi alterado. Confirme o novo email para poder fazer login.");
-              signOut();
-            }, 1500);
-          })
-          .catch((error) => alert(error.message));
+        database
+          .collection("users")
+          .doc(user.uid)
+          .update({ email: newEmail.email.toString().trim() })
+          .then((val) => {
+            auth
+              .signOut()
+              .then(() => {
+                setLogoutLoader(true);
+                setTimeout(() => {
+                  normalAlert("Atenção", "O teu email foi alterado. Confirme o novo email para poder fazer login.");
+                  signOut();
+                }, 1500);
+              })
+              .catch((error) => alert(error.message));
+          });
       });
     }
   };
@@ -155,7 +161,6 @@ export default (props) => {
       })
       .catch(function (error) {
         if (error.code === "auth/user-not-found") {
-          console.log("no user found");
           normalAlert("Alterar Password", "Não existe nenhum utilizador associado ao email 😓", "Verificar");
         }
       });
@@ -221,9 +226,7 @@ export default (props) => {
     }
   };
 
- 
   let profile = () => {
-    console.log(props.show)
     if (props.show == true) {
       return (
         <Text style={styles.name}>
@@ -235,8 +238,6 @@ export default (props) => {
     }
   };
 
-
-
   let getBody = () => {
     if (!changeEmailUi) {
       return (
@@ -245,7 +246,7 @@ export default (props) => {
             <View>
               <Image source={require("../images/Avatars/avatar.png")} style={styles.logo} />
             </View>
-           {profile()}
+            {profile()}
           </View>
 
           <View style={styles.buttons}>
@@ -363,7 +364,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   btnLogout: {
-    marginTop: heightPercentageToDP("20%"),
+    marginTop: heightPercentageToDP("10%"),
   },
   title: {
     fontWeight: "bold",

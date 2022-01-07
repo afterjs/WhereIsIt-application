@@ -1,26 +1,38 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Dimensions, Image, Text, TouchableOpacity } from "react-native";
+import { View, StyleSheet, Dimensions, Image, Text, TouchableOpacity, LogBox } from "react-native";
 import * as Location from "expo-location";
 import WaitLocation_Screen from "../components/WaitLocation";
 import { StatusBar } from "expo-status-bar";
 import { Marker, Callout } from "react-native-maps";
 import MapView from "react-native-map-clustering";
 import tile from "../../Config/whiteMode";
-import lixo from "../images/Icons/lixo-pin.png";
-import banco from "../images/Icons/caixa-pin.png";
-import { database } from "../../Config/firebase";
+
+import { database, auth } from "../../Config/firebase";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getDistance } from "geolib";
 import { useIsFocused } from "@react-navigation/native";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import MapOptions from "../screens/MapOptions";
+import * as Linking from "expo-linking";
+import { heightPercentageToDP, widthPercentageToDP } from "../../Config/snippets";
+import { RFValue } from "react-native-responsive-fontsize";
 
-import * as Linking from 'expo-linking';
+import lixo from "../images/Icons/lixo-pin.png";
+import banco from "../images/Icons/caixa-pin.png";
+import ctt from "../images/Icons/pin-ctt.png";
+import interesse from "../images/Icons/pin-interesse.png";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+LogBox.ignoreLogs(["AsyncStorage has been extracted from react-native core and will be removed in a future release."]);
+LogBox.ignoreLogs(["Setting a timer"]);
 
 let gpsChecker = false;
 const checkServiceGps = require("../components/GpsStatus");
 
 export default (props) => {
+  const [alreadyTaked, setAlreadyTaked] = useState(false);
+  const [alreadyRequested, setAlreadyRequested] = useState(false);
   const [waitLocation, setWaitLocation] = useState(true);
   const [showBtn, setShowBtn] = useState(false);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
@@ -46,7 +58,7 @@ export default (props) => {
   if (isFocused) {
     if (isMapLoaded) {
       gpsChecker = setInterval(async () => {
-         checkServiceGps().then((val) => {
+        checkServiceGps().then((val) => {
           if (!val) {
             setIsMapLoaded(false);
             setShowBtn(true);
@@ -56,6 +68,14 @@ export default (props) => {
       }, 2000);
     }
   }
+
+  const saveData = async (key, value) => {
+    try {
+      await AsyncStorage.setItem(key, value);
+    } catch (error) {
+      alert(error);
+    }
+  };
 
   let requestLoc = () => {
     (async () => {
@@ -69,7 +89,7 @@ export default (props) => {
 
       try {
         let location = await Location.getCurrentPositionAsync({});
-        getPins(null).then((val) => {
+        if (alreadyRequested) {
           setTimeout(() => {
             setIsMapLoaded(true);
             setWaitLocation(false);
@@ -77,33 +97,78 @@ export default (props) => {
             setLat(JSON.stringify(location.coords.latitude));
             setLong(JSON.stringify(location.coords.longitude));
           }, 1000);
-        });
+        } else {
+          getPins().then(() => {
+            setTimeout(() => {
+              setIsMapLoaded(true);
+              setWaitLocation(false);
+
+              setLat(JSON.stringify(location.coords.latitude));
+              setLong(JSON.stringify(location.coords.longitude));
+            }, 1000);
+          });
+        }
       } catch (error) {
         setShowBtn(true);
       }
     })();
   };
 
-  let getPins = async (pinType) => {
+  let getPins = async () => {
     const ref = database.collection("pinsData");
-    ref.onSnapshot((querySnashot) => {
-      const items = [];
-      querySnashot.forEach((doc) => {
-        if (pinType === null) {
-          if (doc.data().type === iconSelected) {
-            items.push(doc.data());
-          }
-        } else {
-          if (doc.data().type === pinType) {
-            items.push(doc.data());
-          }
-        }
-      });
 
-      setPins(items);
-      update(items);
-      return true;
+    ref.onSnapshot((querySnashot, iconSelected) => {
+      if (auth.currentUser) {
+        const items = [];
+        let docSize = querySnashot.docs.length;
+
+        if (docSize != 0) {
+          querySnashot.forEach((doc) => {
+            items.push(doc.data());
+          });
+
+          (async () => {
+            try {
+              let iconName = await AsyncStorage.getItem("pin");
+              setPins(items);
+              updateWithIcon(items, iconName);
+            } catch (error) {}
+          })();
+        } else {
+          setPinsByLoc([]);
+          setPins([]);
+        }
+
+        return true;
+      } else {
+        return false;
+      }
     });
+  };
+
+  let updatePinSeted = async (novoPin) => {
+    let newIconsData = [];
+
+    var range = 30;
+
+    if (zoom < 10) {
+      range = 1000;
+    }
+
+    pins.forEach((item, index) => {
+      if (item.type == novoPin) {
+        if (distanceRange(item.loc.latitude, item.loc.longitude) < range) {
+          newIconsData.push(item);
+        }
+      }
+    });
+
+    if (newIconsData.length > 0) {
+      setPinsByLoc(newIconsData);
+    } else {
+      setPinsByLoc([]);
+    }
+    return true;
   };
 
   let imageResolve = (img) => {
@@ -112,44 +177,13 @@ export default (props) => {
     } else if (img.trim() === "banco") {
       return banco;
     } else if (img.trim() === "ctt") {
-      return banco;
+      return ctt;
+    } else if (img.trim() === "interesse") {
+      return interesse;
     }
   };
 
-  let update = (arr) => {
-    var data = [];
-
-    var range = 30;
-
-    if (zoom < 10) {
-      range = 1000;
-    }
-
-    if (arr.length === 0) {
-      pins.forEach((item) => {
-        if (distanceRange(item.loc.latitude, item.loc.longitude) < range) {
-          if (item.type === iconSelected) {
-            data.push(item);
-          }
-        }
-      });
-    } else {
-      arr.forEach((item) => {
-        if (distanceRange(item.loc.latitude, item.loc.longitude) < range) {
-          if (item.type === iconSelected) {
-            data.push(item);
-          }
-        }
-      });
-    }
-
-    if (data.length !== 0) {
-      setPinsByLoc(data);
-    }
-  };
-
-  let changePinMap = async (type) => {
-    console.log("type é - ", type);
+  let update = () => {
     var data = [];
 
     var range = 30;
@@ -160,8 +194,7 @@ export default (props) => {
 
     pins.forEach((item) => {
       if (distanceRange(item.loc.latitude, item.loc.longitude) < range) {
-        if (item.type === type) {
-          console.log("inside");
+        if (item.type === iconSelected) {
           data.push(item);
         }
       }
@@ -169,17 +202,40 @@ export default (props) => {
 
     if (data.length !== 0) {
       setPinsByLoc(data);
+    } else {
+      setPinsByLoc([]);
     }
-
-    return true;
   };
 
-
-
   let chooseGPSType = (coords) => {
-    var scheme = Platform.OS === 'ios' ? 'maps:' : 'geo:';
-  var url = scheme + `${coords.latitude},${coords.latitude}`;
-  Linking.openURL(url);
+    var scheme = Platform.OS === "ios" ? "maps:" : "geo:";
+    var url = scheme + `${coords.latitude},${coords.longitude}`;
+
+    Linking.openURL(url);
+  };
+
+  let updateWithIcon = (arr, icon) => {
+    var data = [];
+
+    var range = 30;
+
+    if (zoom < 10) {
+      range = 1000;
+    }
+
+    arr.forEach((item) => {
+      if (distanceRange(item.loc.latitude, item.loc.longitude) < range) {
+        if (item.type === icon) {
+          data.push(item);
+        }
+      }
+    });
+
+    if (data.length !== 0) {
+      setPinsByLoc(data);
+    } else {
+      setPinsByLoc([]);
+    }
   };
 
   function createMarker() {
@@ -219,7 +275,6 @@ export default (props) => {
                 <Text style={styles.locText}>Marcar Localização</Text>
                 <MaterialIcons name="gps-fixed" size={30} color="#05164B" />
               </View>
-
             </View>
             <View style={styles.arrowBorder} />
             <View style={styles.arrow} />
@@ -234,41 +289,50 @@ export default (props) => {
     return parseInt(distance / 1000);
   }
 
-
-
   let changeScreenOption = (boolOps, boolMap) => {
     setShowOptions(boolOps);
     setIsMapLoaded(boolMap);
   };
 
   useEffect(() => {
-    
-    checkServiceGps().then((state) => {
-      if (state) {
-        getPins(null).then((val) => {
-          setTimeout(() => {
-            setIsMapLoaded(true);
-            setWaitLocation(false);
-          }, 1000);
-        });
-      } else {
-        setTimeout(() => {
-          setShowBtn(true);
-        }, 2000);
-      }
-    });
+    (async () => {
+      try {
+        let pn = await AsyncStorage.getItem("pin");
+        let mpStyle = await AsyncStorage.getItem("map");
 
-    return () => {
-      console.log("clean up");
-    };
+        if (pn != null) {
+          setNewIconSelected(pn);
+        }
+        if (mpStyle != null) {
+          setMapType(mpStyle);
+        }
+      } catch (error) {}
+
+      const task = checkServiceGps().then((state) => {
+        if (state) {
+          setAlreadyRequested(true);
+          getPins().then((val) => {
+            setTimeout(() => {
+              setIsMapLoaded(true);
+              setWaitLocation(false);
+            }, 1000);
+          });
+        } else {
+          setTimeout(() => {
+            setShowBtn(true);
+          }, 2000);
+        }
+      });
+    })();
   }, []);
 
   let setIconType = (newIcon) => {
+    saveData("pin", newIcon);
     setNewIconSelected(newIcon);
     setWaitLocation(true);
     changeScreenOption(false, true);
 
-    getPins(newIcon).then((val) => {
+    updatePinSeted(newIcon).then((val) => {
       setTimeout(() => {
         setIsMapLoaded(true);
         setWaitLocation(false);
@@ -277,6 +341,7 @@ export default (props) => {
   };
 
   let changeMapType = (map) => {
+    saveData("map", map);
     setMapType(map);
     setWaitLocation(true);
     changeScreenOption(false, true);
@@ -309,7 +374,7 @@ export default (props) => {
               changeScreenOption(true, false);
             }}
           >
-            <MaterialCommunityIcons name="map-search-outline" size={30} color="red" />
+            <MaterialCommunityIcons name="map-search-outline" size={30} color="#05164B" />
           </TouchableOpacity>
         </View>
 
@@ -335,7 +400,7 @@ export default (props) => {
           onRegionChangeComplete={(e) => {
             setLat(e.latitude);
             setLong(e.longitude);
-            update([]);
+            update();
 
             var zoom = parseInt(Math.log2(360 * (Dimensions.get("window").width / 256 / e.longitudeDelta)));
             setZoom(zoom);
@@ -365,14 +430,14 @@ const styles = StyleSheet.create({
   item: {
     justifyContent: "center",
     alignItems: "center",
-    height: 40,
-    width: 40,
+    height: heightPercentageToDP("5%"),
+    width: widthPercentageToDP("10%"),
     backgroundColor: "white",
     position: "absolute",
-    top: 40,
-    left: 30,
+    top: heightPercentageToDP("13%"),
+    right: widthPercentageToDP("2.6%"),
     zIndex: 1,
-    opacity: 0.5,
+    opacity: 0.8,
   },
   bubble: {
     flexDirection: "column",
@@ -403,14 +468,14 @@ const styles = StyleSheet.create({
   },
 
   name: {
-    fontSize: 20,
+    fontSize: RFValue(15),
     marginBottom: 5,
     textAlign: "center",
     color: "#05164B",
     fontWeight: "bold",
   },
   streetName: {
-    fontSize: 15,
+    fontSize: RFValue(12),
     fontWeight: "bold",
   },
   description: {
@@ -421,12 +486,8 @@ const styles = StyleSheet.create({
   locText: {
     color: "#05164B",
     fontWeight: "bold",
-    fontSize: 15,
+    fontSize: RFValue(13),
   },
-
-  //streetName
-  //description
-
   gpsButton: {
     flexDirection: "row",
     justifyContent: "space-around",
@@ -445,11 +506,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "red",
   },
-  goLoc: { 
-    flexDirection: "row", 
-    alignContent: "center", 
-    textAlign: "center", 
-    alignItems: "center", 
-    marginTop: 5, 
-    justifyContent: "space-around" },
+  goLoc: {
+    flexDirection: "row",
+    alignContent: "center",
+    textAlign: "center",
+    alignItems: "center",
+    marginTop: 5,
+    justifyContent: "space-around",
+  },
 });

@@ -10,11 +10,8 @@ import * as Location from "expo-location";
 import { Marker, Callout } from "react-native-maps";
 import { database, auth } from "../../../Config/firebase";
 import { getDistance } from "geolib";
-
-import AnalyzePin from "../../screens/admin/AnalyzePin";
-
-import lixo from "../../images/Icons/lixo-pin.png";
-import banco from "../../images/Icons/caixa-pin.png";
+import Delete from "./Delete";
+import UpdatePin from "./UpdatePinData";
 
 let gpsChecker = false;
 const checkServiceGps = require("../../components/GpsStatus");
@@ -31,6 +28,11 @@ export default (props) => {
   const [showBtn, setShowBtn] = useState(false);
   const [pinsByLoc, setPinsByLoc] = useState([]);
   const user = auth.currentUser;
+
+  //
+  const [showDeleteScreen, setShowDeleteScreen] = useState(false);
+  const [showUpdateScreen, setShowUpdateScreen] = useState(false);
+
   var top = useSafeAreaInsets().top;
 
   const isFocused = useIsFocused();
@@ -54,20 +56,23 @@ export default (props) => {
   }
 
   let getPins = async () => {
-    const ref = database.collection("pendingPins");
-    ref.where("status", "==", "pending").onSnapshot((querySnashot) => {
-      const items = [];
-      querySnashot.forEach((doc) => {
-        const result = {
-          ...doc.data(),
-          id: doc.id,
-        };
+    const ref = database.collection("pinsData");
+    ref.onSnapshot((querySnashot) => {
+      if (auth.currentUser) {
+        const items = [];
+        querySnashot.forEach((doc) => {
+          const result = {
+            ...doc.data(),
+            id: doc.id,
+          };
 
-        items.push(result);
-      });
-      update(items);
-
-      return true;
+          items.push(result);
+        });
+        update(items);
+        return true;
+      } else {
+        return false;
+      }
     });
   };
 
@@ -151,28 +156,32 @@ export default (props) => {
     });
   }, []);
 
-  let screen = () => {
-    setShowScreen(!showScreen);
+  let deletePoint = (uid) => {
+    setUid(uid);
+    setShowDeleteScreen(true);
   };
 
-  let changeScren = (uid) => {
+  let updatePoint = (uid) => {
     setUid(uid);
-    screen();
+    setShowUpdateScreen(true);
   };
 
   const createThreeButtonAlert = (uid) =>
-    Alert.alert("Pedidos Pendentes", "Ver informações do ponto de interesse? ", [
+    Alert.alert("Pontos de Interesse", "Escolha uma ação", [
       {
-        text: "Sim",
-        onPress: () => changeScren(uid),
+        text: "Editar Dados",
+        onPress: () => updatePoint(uid),
       },
       {
-        text: "Cancelar",
+        text: "Eliminar Ponto",
+        onPress: () => deletePoint(uid),
+      },
+
+      {
+        text: "Fechar",
         style: "cancel",
       },
     ]);
-
-
 
   function createMarker() {
     return pinsByLoc.map((marker, index) => (
@@ -184,7 +193,6 @@ export default (props) => {
         }}
         title={marker.title}
       >
-      
         <Callout
           tooltip
           onPress={() => {
@@ -206,7 +214,7 @@ export default (props) => {
               />
 
               <View style={styles.pressEdit}>
-                <Text style={styles.locText}>Clicar para editar</Text>
+                <Text style={styles.locText}>Clicar para ver opções</Text>
               </View>
             </View>
             <View style={styles.arrowBorder} />
@@ -217,8 +225,12 @@ export default (props) => {
     ));
   }
 
-  if (showScreen) {
-    return <AnalyzePin uid={uid} setScreen={screen}></AnalyzePin>;
+  if (showDeleteScreen) {
+    return <Delete uid={uid} setShowDeleteScreen={setShowDeleteScreen} />;
+  }
+
+  if (showUpdateScreen) {
+    return <UpdatePin uid={uid} setShowUpdateScreen={setShowUpdateScreen} />;
   }
 
   if (waitLocation) {

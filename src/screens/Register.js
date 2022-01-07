@@ -47,21 +47,20 @@ export default (props) => {
   const handleSignUp = () => {
     var valid = isAllValid();
 
-    valid
-      ? auth
+    if(valid) {
+       auth
           .createUserWithEmailAndPassword(email, password)
           .then((userCreadentials) => {
             const user = userCreadentials.user;
             const docRef = database.collection("users").doc(user.uid);
-
             docRef
               .set({
                 name: name,
                 email: user.email,
-                map: false,
                 permissions: 0,
                 points: 0,
-                pendingPinsCount: 0
+                pendingPinsCount: 0,
+                canLogin: true,
               })
               .then(async (t) => {
                 user.sendEmailVerification();
@@ -80,10 +79,10 @@ export default (props) => {
               normalAlert("Nova Conta", "O email já se encontra em uso! Tenta com outro email!", "Verificar");
             }
 
-            console.log(error.message);
+  
             setBtn(false);
           })
-      : normalAlert("Nova Conta", "Verifica se todos os campos estão corretos!", "Verificar");
+         }else { normalAlert("Nova Conta", "Verifica se todos os campos estão corretos!", "Verificar")}
   };
 
   const isAllValid = () => {
@@ -91,7 +90,11 @@ export default (props) => {
     var valid = false;
 
     name.trim() !== "" && isValidEmail && isValidPassword && isChecked ? ((valid = true), setBtn(true)) : (valid = false);
-    setIsLoading(true);
+
+    if(valid) {
+      setIsLoading(true);
+    }
+
     return valid;
   };
 
@@ -195,7 +198,7 @@ const styles = StyleSheet.create({
   },
   form: {
     marginHorizontal: 20,
-    marginTop: heightPercentageToDP("5%"),
+    marginTop: heightPercentageToDP("3%"),
   },
   input: {
     height: 40,

@@ -13,6 +13,8 @@ export default (props) => {
   const [items, setItems] = useState([
     { label: "Contentores do Lixo", value: "lixo" },
     { label: "Caixas de Multibanco", value: "banco" },
+    { label: "CTT", value: "ctt" },
+    { label: "Interesses", value: "interesse" },
   ]);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -32,12 +34,16 @@ export default (props) => {
       return "Contentores do Lixo";
     } else if (value === "banco") {
       return "Caixas de Multibanco";
+    } else if (value === "ctt") {
+      return "CTT";
+    } else if (value === "interesse") {
+      return "Interesses";
     }
   };
 
   //function to convert timestamp to date
   function timeConverter(UNIX_timestamp) {
-    var a = new Date(UNIX_timestamp * 1000);
+    var a = new Date(UNIX_timestamp);
     var months = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outobro", "novembro", "dezembro"];
     var year = a.getFullYear();
     var month = months[a.getMonth()];
@@ -96,20 +102,20 @@ export default (props) => {
             .collection("users")
             .doc(user)
             .update({
-              points: firebase.firestore.FieldValue.increment(2),
-            });
-
-          database
-            .collection("users")
-            .doc(user)
-            .update({
               pendingPinsCount: firebase.firestore.FieldValue.increment(-1),
+            })
+            .then(() => {
+              database
+                .collection("users")
+                .doc(user)
+                .update({
+                  points: firebase.firestore.FieldValue.increment(2),
+                });
             });
         });
 
       setUpdatingPin(true);
       setTimeout(() => {
-        setUpdatingPin(false);
         props.setScreen();
         Alert.alert("Atenção", "Pin aceite com sucesso e pontos entregues!", [{ text: "OK" }], { cancelable: false });
       }, 1500);
@@ -120,7 +126,6 @@ export default (props) => {
 
       setUpdatingPin(true);
       setTimeout(() => {
-        setUpdatingPin(false);
         props.setScreen();
         Alert.alert("Atenção", "Pin rejeitado com sucesso!", [{ text: "OK" }], { cancelable: false });
       }, 1500);
@@ -280,7 +285,7 @@ const styles = StyleSheet.create({
   item: {
     justifyContent: "center",
     alignItems: "center",
-    height: 40,
+    height: heightPercentageToDP("4%"),
     width: 40,
     backgroundColor: "white",
     position: "absolute",
@@ -293,14 +298,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: "bold",
     color: "#05164B",
-    top: 43,
-  },
-  pinTypeView: {
-    marginTop: 20,
-    marginBottom: 20,
-    flexDirection: "column",
-    paddingHorizontal: "10%",
-    top: heightPercentageToDP("15%"),
+    top: heightPercentageToDP("4%"),
   },
   picker: {
     width: 100,
@@ -317,7 +315,7 @@ const styles = StyleSheet.create({
   },
   form: {
     paddingHorizontal: "10%",
-    top: heightPercentageToDP("10%"),
+    top: heightPercentageToDP("5%"),
   },
   input: {
     height: heightPercentageToDP("5%"),
@@ -351,7 +349,7 @@ const styles = StyleSheet.create({
     color: "#646369",
   },
   buttons: {
-    marginTop: heightPercentageToDP("20%"),
+    marginTop: heightPercentageToDP("10%"),
   },
   btns: {
     flexDirection: "row",

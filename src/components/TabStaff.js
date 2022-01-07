@@ -6,8 +6,8 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { FontAwesome5, MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 
 import Profile from "../screens/Profile";
-import ListUsers from "../screens/admin/ListUsers";
-
+import PendingPins from "../screens/staff/PendingPins";
+import UpdatePin from "../screens/staff/UpdatePins";
 
 const Tab = createBottomTabNavigator();
 
@@ -46,8 +46,30 @@ export default class Tavbar extends React.Component {
             ],
           }}
         >
-          <Tab.Screen name="Utilizadores" children={() => <ListUsers showType={0} />}options={this.barIcon("users", 30)} />
-          <Tab.Screen name="Gerir Staffs"  children={() => <ListUsers showType={1} />} options={this.barIcon("user-cog", 30)} />
+          <Tab.Screen
+            name="Pins Pendentes"
+            component={PendingPins}
+            options={{
+              tabBarIcon: ({ focused }) => (
+                <View>
+                  <MaterialCommunityIcons name="map-clock" size={30} color={focused ? "#05164B" : "gray"}></MaterialCommunityIcons>
+                </View>
+              ),
+            }}
+          />
+
+          <Tab.Screen
+            name="Pins"
+            component={UpdatePin}
+            options={{
+              tabBarIcon: ({ focused }) => (
+                <View>
+                  <MaterialCommunityIcons name="map" size={30} color={focused ? "#05164B" : "gray"}></MaterialCommunityIcons>
+                </View>
+              ),
+            }}
+          />
+
           <Tab.Screen name="Perfil" children={() => <Profile show={false} />} options={this.barIcon("user-alt", 30)} />
         </Tab.Navigator>
       </NavigationContainer>

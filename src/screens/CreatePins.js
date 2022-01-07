@@ -7,7 +7,6 @@ import { normalAlert } from "../components/Alerts";
 import Loader from "../components/Loader";
 import DropDownPicker from "react-native-dropdown-picker";
 import { database, auth, firebase } from "../../Config/firebase";
-import { getDistance } from "geolib";
 
 export default (props) => {
   const [open, setOpen] = useState(false);
@@ -17,6 +16,8 @@ export default (props) => {
   const [items, setItems] = useState([
     { label: "Contentores do Lixo", value: "lixo" },
     { label: "Caixas de Multibanco", value: "banco" },
+    { label: "CTT", value: "ctt" },
+    { label: "Interesses", value: "interesse" },
   ]);
 
   let resolveTitle = async (value) => {
@@ -24,12 +25,14 @@ export default (props) => {
       return "Contentores do Lixo";
     } else if (value === "banco") {
       return "Caixas de Multibanco";
+    } else if (value === "ctt") {
+      return "CTT";
+    } else if (value === "interesse") {
+      return "Interesses";
     }
   };
 
-
   let addNewPin = async () => {
-
     if (value == null) {
       normalAlert("Atenção", "Por favor selecione um tipo de ponto", "OK");
       return;
@@ -37,13 +40,11 @@ export default (props) => {
 
     setShowLoader(true);
 
-    let pinsData = props.pins
+    let pinsData = props.pins;
 
     if (description.replace(/\s/g, "").length == 0) {
       setDescription("Sem descrição...");
     }
-
-
 
     const data = {
       description: description,
@@ -65,16 +66,16 @@ export default (props) => {
           .doc(auth.currentUser.uid)
           .update({
             pendingPinsCount: firebase.firestore.FieldValue.increment(1),
+          })
+          .then((val) => {
+            normalAlert("Sucesso", "Ponto criado com sucesso", "OK");
+            props.setScreen(1);
           });
-
-        normalAlert("Sucesso", "Ponto criado com sucesso", "OK");
-        setShowLoader(false);
-        props.setScreen(1);
       });
   };
 
-  if(showLoader) {
-    return <Loader text={"A adicionar novo ponto 🥰"}></Loader>
+  if (showLoader) {
+    return <Loader text={"A adicionar novo ponto 🥰"}></Loader>;
   }
 
   return (
@@ -110,27 +111,31 @@ export default (props) => {
           }}
         />
       </View>
+      <View style={styles.descriptionView}>
+        <View style={styles.form}>
+          <Text style={styles.inputTitle}>Breve Descrição</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Não obrigatorio"
+            value={description}
+            onChangeText={(text) => {
+              setDescription(text);
+            }}
+          />
+          <View style={styles.inputUnder} />
+        </View>
 
-      <View style={styles.form}>
-        <Text style={styles.inputTitle}>Breve Descrição</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Não obrigatorio"
-          value={description}
-          onChangeText={(text) => {
-            setDescription(text);
-          }}
-        />
-        <View style={styles.inputUnder} />
-      </View>
+        <View style={styles.form}>
+          <Text style={styles.inputTitle}>Latitude</Text>
+          <TextInput style={styles.input} value={props.lat.toString()} editable={false} />
+          <View style={styles.inputUnder} />
+        </View>
 
-      <View style={styles.coordsForm}>
-        <Text style={styles.inputTitle}>
-          Latitude -{">"} {props.lat}
-        </Text>
-        <Text style={styles.inputTitle}>
-          Longitude -{">"} {props.long}
-        </Text>
+        <View style={styles.form}>
+          <Text style={styles.inputTitle}>Longitude</Text>
+          <TextInput style={styles.input} value={props.long.toString()} editable={false} />
+          <View style={styles.inputUnder} />
+        </View>
       </View>
 
       <TouchableOpacity
@@ -164,17 +169,16 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: "center",
-    fontSize: 30,
+    fontSize: RFValue(20),
     fontWeight: "bold",
     color: "#05164B",
     top: 43,
   },
   pinTypeView: {
-    marginTop: 20,
     marginBottom: 20,
     flexDirection: "column",
     paddingHorizontal: "10%",
-    top: heightPercentageToDP("15%"),
+    top: heightPercentageToDP("10%"),
   },
   picker: {
     width: 100,
@@ -191,7 +195,7 @@ const styles = StyleSheet.create({
   },
   form: {
     paddingHorizontal: "10%",
-    top: heightPercentageToDP("25%"),
+    marginTop: heightPercentageToDP("5%"),
   },
   input: {
     height: heightPercentageToDP("5%"),
@@ -200,7 +204,7 @@ const styles = StyleSheet.create({
   },
   inputTitle: {
     color: "#05164B",
-    fontSize: RFValue(20),
+    fontSize: RFValue(18),
     fontWeight: "bold",
   },
   inputUnder: {
@@ -208,7 +212,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
   },
   button: {
-    marginTop: heightPercentageToDP("45%"),
+    marginTop: heightPercentageToDP("10%"),
     height: 50,
     alignItems: "center",
     backgroundColor: "#05164B",
@@ -226,5 +230,8 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     top: heightPercentageToDP("30%"),
     paddingHorizontal: "10%",
+  },
+  descriptionView: {
+    marginTop: heightPercentageToDP("10%"),
   },
 });

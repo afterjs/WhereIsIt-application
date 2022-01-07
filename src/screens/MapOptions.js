@@ -12,6 +12,8 @@ export default (props) => {
 
   const [lixoOpacity, setLixoOpacity] = useState(true);
   const [bancoOpacity, setBancoOpacity] = useState(false);
+  const [cttOpacity, setCttOpacity] = useState(false);
+  const [interesseOpacity, setInteresseOpacity] = useState(false);
 
   const [sateliteOpacity, setSateliteOpacity] = useState(false);
   const [defaultOpacity, setDefaultOpaciy] = useState(false);
@@ -24,10 +26,26 @@ export default (props) => {
       case "lixo":
         setLixoOpacity(false);
         setBancoOpacity(true);
+        setCttOpacity(true);
+        setInteresseOpacity(true);
         break;
       case "banco":
         setLixoOpacity(true);
         setBancoOpacity(false);
+        setCttOpacity(true);
+        setInteresseOpacity(true);
+        break;
+      case "ctt":
+        setLixoOpacity(true);
+        setBancoOpacity(true);
+        setCttOpacity(false);
+        setInteresseOpacity(true);
+        break;
+      case "interesse":
+        setLixoOpacity(true);
+        setBancoOpacity(true);
+        setCttOpacity(true);
+        setInteresseOpacity(false);
         break;
     }
 
@@ -41,44 +59,82 @@ export default (props) => {
         setSateliteOpacity(false);
         break;
     }
-    return () => {
-      console.log("clear up");
-    };
+    return () => {};
   }, []);
 
   //quando é escolhido tem de ser setado em falso, e o resto em true
 
   let returnPinBlockCode = () => {
     return (
-      <View style={styles.imgGroup}>
-        <TouchableOpacity
-          onPress={() => {
-            setLixoOpacity(false);
-            setBancoOpacity(true);
-            setIconSelected("lixo");
-          }}
-          disabled={!lixoOpacity ? true : false}
-        >
-          <View style={[styles.form, lixoOpacity ? opacity : { opacity: 1 }]}>
-            <Text style={styles.iconText}>LIXO</Text>
-            <Image source={require("../images/Icons/lixo-pin.png")} style={styles.icon} />
-          </View>
-        </TouchableOpacity>
+      <>
+        <View style={styles.imgGroup}>
+          <TouchableOpacity
+            onPress={() => {
+              setLixoOpacity(false);
+              setBancoOpacity(true);
+              setCttOpacity(true);
+              setInteresseOpacity(true);
+              setIconSelected("lixo");
+            }}
+            disabled={!lixoOpacity ? true : false}
+          >
+            <View style={[styles.form, lixoOpacity ? opacity : { opacity: 1 }]}>
+              <Text style={styles.iconText}>Lixo</Text>
+              <Image source={require("../images/Icons/lixo-pin.png")} style={styles.icon} />
+            </View>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => {
-            setLixoOpacity(true);
-            setBancoOpacity(false);
-            setIconSelected("banco");
-          }}
-          disabled={!bancoOpacity ? true : false}
-        >
-          <View style={[styles.form, bancoOpacity ? opacity : { opacity: 1 }]}>
-            <Text style={styles.iconText}>Multibanco</Text>
-            <Image source={require("../images/Icons/caixa-pin.png")} style={styles.icon} />
-          </View>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            onPress={() => {
+              setLixoOpacity(true);
+              setBancoOpacity(false);
+              setCttOpacity(true);
+              setInteresseOpacity(true);
+              setIconSelected("banco");
+            }}
+            disabled={!bancoOpacity ? true : false}
+          >
+            <View style={[styles.form, bancoOpacity ? opacity : { opacity: 1 }]}>
+              <Text style={styles.iconText}>Multibanco</Text>
+              <Image source={require("../images/Icons/caixa-pin.png")} style={styles.icon} />
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.imgGroup}>
+          <TouchableOpacity
+            onPress={() => {
+              setLixoOpacity(true);
+              setBancoOpacity(true);
+              setInteresseOpacity(true);
+              setCttOpacity(false);
+              setIconSelected("ctt");
+            }}
+            disabled={!cttOpacity ? true : false}
+          >
+            <View style={[styles.form, cttOpacity ? opacity : { opacity: 1 }]}>
+              <Text style={styles.iconText}>CTT</Text>
+              <Image source={require("../images/Icons/pin-ctt.png")} style={styles.icon} />
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+              setLixoOpacity(true);
+              setBancoOpacity(true);
+              setCttOpacity(true);
+              setInteresseOpacity(false);
+              setIconSelected("interesse");
+            }}
+            disabled={!interesseOpacity ? true : false}
+          >
+            <View style={[styles.form, interesseOpacity ? opacity : { opacity: 1 }]}>
+              <Text style={styles.iconText}>Diversão</Text>
+              <Image source={require("../images/Icons/pin-interesse.png")} style={styles.icon} />
+            </View>
+          </TouchableOpacity>
+        </View>
+      </>
     );
   };
 
@@ -299,7 +355,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     flexDirection: "row",
     flexWrap: "wrap",
-    padding: "15%",
+    padding: "9%",
   },
   mapsGroup: {
     flexDirection: "column",
@@ -314,7 +370,7 @@ const styles = StyleSheet.create({
   },
   ScrollView: {
     marginTop: heightPercentageToDP("2%"),
-    height: heightPercentageToDP("70%"),
+    height: heightPercentageToDP("65%"),
   },
   button: {
     marginTop: heightPercentageToDP("1%"),
