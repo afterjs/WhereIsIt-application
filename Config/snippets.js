@@ -1,5 +1,4 @@
-import { Dimensions, PixelRatio, Alert} from 'react-native'
-
+import { Dimensions, PixelRatio} from 'react-native'
 
 const widthPercentageToDP = widthPercent => {
     const screenWidth = Dimensions.get('window').width;
@@ -11,24 +10,9 @@ const heightPercentageToDP = heightPercent => {
     return PixelRatio.roundToNearestPixel(screenHeight * parseFloat(heightPercent) / 100);
 };
 
-const createTwoButtonAlert = (title, message) => {
-    val = false
-    
-    Alert.alert(title, message, [
-        {
-            text: 'Cancelar',
-            onPress: () => val = false,
-            style: 'cancel',
-        },
-        { text: 'OK', onPress: () => val = true },
-    ]);
-
-
-}
 
 
 export {
     widthPercentageToDP,
-    heightPercentageToDP,
-    createTwoButtonAlert
+    heightPercentageToDP
 }
