@@ -175,8 +175,7 @@ export default (props) => {
       }).then((res) => {
         let street = res[0].street || "Estrada sem nome";
         setStreetName(street);
-        console.log(res[0]);
-        console.log(street)
+
         for (let i = 0; i < pinsByLoc.length; i++) {
           let distance = getDistance({ latitude: pinsByLoc[i].loc.latitude, longitude: pinsByLoc[i].loc.longitude }, { latitude: MarkerLat, longitude: MarkerLong });
 
