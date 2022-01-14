@@ -38,8 +38,11 @@ export default (props) => {
     }, 1000);
   };
 
-  useEffect(() => {
+  /*useEffect(() => {
+    
     const unsubscribe = auth.onAuthStateChanged((user) => {
+      auth.signOut()
+      console.log(user)
       if (user) {
         if (user.emailVerified) {
           const userDoc = database.collection("users").doc(user.uid).get();
@@ -90,7 +93,7 @@ export default (props) => {
       }
     });
     return unsubscribe;
-  }, []);
+  }, []);*/
 
   const validate = (text) => {
     let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
@@ -169,6 +172,7 @@ export default (props) => {
               }
             });
           } else {
+            setIsLoading(true);
             auth
               .signOut()
               .then(() => {
@@ -179,12 +183,16 @@ export default (props) => {
           }
         })
         .catch((error) => {
+          setIsLoading(false);
+          auth
+          .signOut()
           counter++;
           counter >= 2 ? setForgotPassword(true) : setForgotPassword(false);
 
           normalAlert("Login", "A password é invalida ou o email não existe", "Verificar");
         });
     } else {
+      setIsLoading(false);
       normalAlert("Login", "Tens de preencher todos os campos!", "Verificar");
     }
   };

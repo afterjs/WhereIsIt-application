@@ -98,6 +98,8 @@ export default (props) => {
             setLong(JSON.stringify(location.coords.longitude));
           }, 1000);
         } else {
+          setIsMapLoaded(true); //added
+          setWaitLocation(false); // added
           getPins().then(() => {
             setTimeout(() => {
               setIsMapLoaded(true);
