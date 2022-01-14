@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Dimensions, Image, Text, Alert } from "react-native";
+import { View, StyleSheet, Dimensions, Image, Text, Alert, LogBox} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import MapView from "react-native-map-clustering";
@@ -12,6 +12,13 @@ import { database, auth } from "../../../Config/firebase";
 import { getDistance } from "geolib";
 
 import AnalyzePin from "../../screens/staff/AnalyzePin";
+
+
+
+LogBox.ignoreLogs(["AsyncStorage has been extracted from react-native core and will be removed in a future release."]);
+LogBox.ignoreLogs(["Setting a timer"]);
+LogBox.ignoreLogs(['Warning: ...']); 
+LogBox.ignoreAllLogs();
 
 let gpsChecker = false;
 const checkServiceGps = require("../../components/GpsStatus");

@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useState, useEffect } from "react";
-import { Text, View, StyleSheet, TouchableOpacity, Image, TextInput } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, Image, TextInput, LogBox } from "react-native";
 import { AuthContext } from "../components/context";
 import { heightPercentageToDP } from "../../Config/snippets";
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
@@ -8,6 +8,11 @@ import Loader from "../components/Loader";
 import { Alert } from "react-native";
 import { normalAlert } from "../components/Alerts";
 import { database, auth } from "../../Config/firebase";
+
+LogBox.ignoreLogs(["AsyncStorage has been extracted from react-native core and will be removed in a future release."]);
+LogBox.ignoreLogs(["Setting a timer"]);
+LogBox.ignoreLogs(['Warning: ...']); 
+LogBox.ignoreAllLogs();
 
 export default (props) => {
   const [LogoutLoader, setLogoutLoader] = useState(false);

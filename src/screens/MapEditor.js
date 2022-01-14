@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Dimensions, Image, Text, TouchableOpacity, Alert } from "react-native";
+import { View, StyleSheet, Dimensions, Image, Text, TouchableOpacity, Alert, LogBox } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import MapView from "react-native-map-clustering";
@@ -16,6 +16,10 @@ import { getDistance } from "geolib";
 import { normalAlert } from "../components/Alerts";
 import here from "../images/Icons/here.png";
 
+LogBox.ignoreLogs(["AsyncStorage has been extracted from react-native core and will be removed in a future release."]);
+LogBox.ignoreLogs(["Setting a timer"]);
+LogBox.ignoreLogs(['Warning: ...']); 
+LogBox.ignoreAllLogs();
 let gpsChecker = false;
 const checkServiceGps = require("../components/GpsStatus");
 

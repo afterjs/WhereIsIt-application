@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput,LogBox } from "react-native";
 import { heightPercentageToDP, widthPercentageToDP } from "../../../Config/snippets";
 import { RFValue } from "react-native-responsive-fontsize";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { database, firebase } from "../../../Config/firebase";
 import DropDownPicker from "react-native-dropdown-picker";
 import Loader from "../../components/Loader";
+
+LogBox.ignoreLogs(["AsyncStorage has been extracted from react-native core and will be removed in a future release."]);
+LogBox.ignoreLogs(["Setting a timer"]);
+LogBox.ignoreLogs(['Warning: ...']); 
+LogBox.ignoreAllLogs();
 
 export default (props) => {
   const [isLoading, setIsLoading] = useState(true);

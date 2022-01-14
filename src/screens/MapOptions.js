@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, StyleSheet, TouchableOpacity, ActivityIndicator, Image, ScrollView } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, ActivityIndicator, Image, ScrollView, LogBox } from "react-native";
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import { widthPercentageToDP, heightPercentageToDP } from "../../Config/snippets";
 
-import { database } from "../../Config/firebase";
+LogBox.ignoreLogs(["AsyncStorage has been extracted from react-native core and will be removed in a future release."]);
+LogBox.ignoreLogs(["Setting a timer"]);
+LogBox.ignoreLogs(['Warning: ...']); 
+LogBox.ignoreAllLogs();
 
 export default (props) => {
   const [choose, setChoose] = useState("pins");

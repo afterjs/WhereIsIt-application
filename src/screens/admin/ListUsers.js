@@ -1,9 +1,14 @@
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import { heightPercentageToDP, widthPercentageToDP } from "../../../Config/snippets";
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ScrollView, Alert, TextInput } from "react-native";
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ScrollView, Alert, TextInput, LogBox } from "react-native";
 import { database, firebase } from "../../../Config/firebase";
 import ShowUsers from "./ShowUsers";
+
+LogBox.ignoreLogs(["AsyncStorage has been extracted from react-native core and will be removed in a future release."]);
+LogBox.ignoreLogs(["Setting a timer"]);
+LogBox.ignoreLogs(['Warning: ...']); 
+LogBox.ignoreAllLogs();
 
 export default (props) => {
   const [data, setData] = useState([]);

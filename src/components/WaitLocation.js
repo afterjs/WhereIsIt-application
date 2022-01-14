@@ -1,8 +1,12 @@
 import React, {useState} from "react";
-import { Text, View, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, ActivityIndicator,LogBox } from "react-native";
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import { heightPercentageToDP } from "../../Config/snippets";
 
+LogBox.ignoreLogs(["AsyncStorage has been extracted from react-native core and will be removed in a future release."]);
+LogBox.ignoreLogs(["Setting a timer"]);
+LogBox.ignoreLogs(['Warning: ...']); 
+LogBox.ignoreAllLogs();
 
 export default (props) => {
 

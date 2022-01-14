@@ -11,6 +11,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 LogBox.ignoreLogs(["AsyncStorage has been extracted from react-native core and will be removed in a future release."]);
 LogBox.ignoreLogs(["Setting a timer"]);
+LogBox.ignoreLogs(['Warning: ...']); 
+LogBox.ignoreAllLogs();
 
 export default (props) => {
   const navigation = useNavigation();

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, StyleSheet, TouchableOpacity, ActivityIndicator, Image, ScrollView, TextInput } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, ActivityIndicator, Image, ScrollView, TextInput, LogBox } from "react-native";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { RFValue } from "react-native-responsive-fontsize";
 import { heightPercentageToDP } from "../../Config/snippets";
@@ -7,6 +7,12 @@ import { normalAlert } from "../components/Alerts";
 import Loader from "../components/Loader";
 import DropDownPicker from "react-native-dropdown-picker";
 import { database, auth, firebase } from "../../Config/firebase";
+
+
+LogBox.ignoreLogs(["AsyncStorage has been extracted from react-native core and will be removed in a future release."]);
+LogBox.ignoreLogs(["Setting a timer"]);
+LogBox.ignoreLogs(['Warning: ...']); 
+LogBox.ignoreAllLogs();
 
 export default (props) => {
   const [open, setOpen] = useState(false);

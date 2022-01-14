@@ -1,12 +1,17 @@
 import { useNavigation } from "@react-navigation/native";
 import React, { useState, useEffect } from "react";
 import { RFValue } from "react-native-responsive-fontsize";
-import { StyleSheet, View, Dimensions, ScrollView, PixelRatio, Text, TextInput, TouchableOpacity, KeyboardAvoidingView } from "react-native";
+import { StyleSheet, View, Dimensions, ScrollView, PixelRatio, Text, TextInput, TouchableOpacity, KeyboardAvoidingView , LogBox} from "react-native";
 import Checkbox from "expo-checkbox";
 import { normalAlert } from "../components/Alerts";
 import { auth, database } from "../../Config/firebase";
 import { heightPercentageToDP } from "../../Config/snippets";
 import Loader from "../components/Loader";
+
+LogBox.ignoreLogs(["AsyncStorage has been extracted from react-native core and will be removed in a future release."]);
+LogBox.ignoreLogs(["Setting a timer"]);
+LogBox.ignoreLogs(['Warning: ...']); 
+LogBox.ignoreAllLogs();
 
 export default (props) => {
   const navigation = useNavigation();

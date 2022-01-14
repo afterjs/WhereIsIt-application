@@ -26,11 +26,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 LogBox.ignoreLogs(["AsyncStorage has been extracted from react-native core and will be removed in a future release."]);
 LogBox.ignoreLogs(["Setting a timer"]);
+LogBox.ignoreLogs(['Warning: ...']); 
+LogBox.ignoreAllLogs();
 
 let gpsChecker = false;
 const checkServiceGps = require("../components/GpsStatus");
 
 export default (props) => {
+  
+
   const [alreadyTaked, setAlreadyTaked] = useState(false);
   const [alreadyRequested, setAlreadyRequested] = useState(false);
   const [waitLocation, setWaitLocation] = useState(true);
@@ -45,6 +49,22 @@ export default (props) => {
   const [iconSelected, setNewIconSelected] = useState("lixo");
   const [mapType, setMapType] = useState("standard");
   const [reloadMap, setRealoadMap] = useState(true);
+
+  
+  /*const [alreadyTaked, setAlreadyTaked] = useState(false);
+  const [alreadyRequested, setAlreadyRequested] = useState(false);
+  const [waitLocation, setWaitLocation] = useState(false);
+  const [showBtn, setShowBtn] = useState(false);
+  const [isMapLoaded, setIsMapLoaded] = useState(true);
+  const [pins, setPins] = useState([]);
+  const [pinsByLoc, setPinsByLoc] = useState([]);
+  const [zoom, setZoom] = useState(15);
+  const [Lat, setLat] = useState("41.695174467275805");
+  const [Long, setLong] = useState("-8.834282105916813");
+  const [showOptions, setShowOptions] = useState(false);
+  const [iconSelected, setNewIconSelected] = useState("lixo");
+  const [mapType, setMapType] = useState("standard");
+  const [reloadMap, setRealoadMap] = useState(true);*/
 
   var top = useSafeAreaInsets().top;
 

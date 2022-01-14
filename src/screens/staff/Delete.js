@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Dimensions, Image, Text, Alert, TouchableOpacity } from "react-native";
+import { View, StyleSheet, Dimensions, Image, Text, Alert, TouchableOpacity, LogBox} from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { RFValue } from "react-native-responsive-fontsize";
 import { heightPercentageToDP } from "../../../Config/snippets";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { database, firebase } from "../../../Config/firebase";
+
+LogBox.ignoreLogs(["AsyncStorage has been extracted from react-native core and will be removed in a future release."]);
+LogBox.ignoreLogs(["Setting a timer"]);
+LogBox.ignoreLogs(['Warning: ...']); 
+LogBox.ignoreAllLogs();
 
 export default (props) => {
   let deletePin = () => {
