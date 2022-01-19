@@ -72,7 +72,7 @@ export default (props) => {
                 }, 1000);
               }
             } else {
-              Alert.alert("Login", "A tua conta foi eliminada.\nContacta o suporte.", [
+              Alert.alert("Login", "A tua conta foi eliminada.\nEntra em conctacto connosco a partir do website!", [
                 {
                   text: "OK",
                 },

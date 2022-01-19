@@ -24,7 +24,7 @@ let gpsChecker = false;
 const checkServiceGps = require("../components/GpsStatus");
 
 export default (props) => {
-  const [creatingPin, setCreatingPin] = useState(true);
+  const [creatingPin, setCreatingPin] = useState(false);
   const [streetName, setStreetName] = useState("");
   const [Lat, setLat] = useState("41.695174467275805");
   const [Long, setLong] = useState("-8.834282105916813");
