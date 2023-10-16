@@ -10,6 +10,12 @@ Este projeto, consiste em uma aplicação web e mobile, que permite encontrar po
 ## Relatorio final
 É possivel encontrar mais informações sobre o projeto no [relatorio](relatorio/Relatorio_Geotagging_Hugo_Diniz_-_Ricardo_Amaro_.pdf) .
 
+## Tecnologias utilizadas 
+- React Native
+- Firebase
+
+<br>
+
 ## Print screens
 
 É possivel ver multiplas print screens no relatorio. 
